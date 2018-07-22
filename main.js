@@ -47,8 +47,10 @@ var GAME={
     this.tiles=[];
     this.clouds=[[],[],[],[],[]];
     createClouds();
-    this.playerDX=250-72;
-    this.playerDY=546-42;
+    this.oneTileX=72;
+    this.oneTileY=42;
+    this.playerDX=250-this.oneTileX;
+    this.playerDY=546-this.oneTileY;
     this.characterString=this.charList[0];
     this.player=this.add.image(this.playerDX,this.playerDY,this.characterString+'Up');
 
@@ -60,11 +62,12 @@ var GAME={
     this.tileSpeed=4;
     this.fasterAnim=1.5;
     //this.newTile=this.add.image(274-72*(this.moveTime-1),648+42*(this.moveTime+1),'tile');
-    this.leadTileX=274-72;
-    this.leadTileY=648-42;
+    this.leadTileX=274-this.oneTileX;
+    this.leadTileY=648-this.oneTileY;
     this.newTileAnswerX=274;
     this.newTileAnswerY=648;
     this.tileDir=1;
+    this.defaultTileSpeed=4;
 
     this.bgType=0;
     pushTile(0,0,'tile');
@@ -74,7 +77,7 @@ var GAME={
 
     this.jumpState=0;
     this.eDis=0;
-    this.jumpSpeed=5;
+    this.jumpSpeed=8;
     this.tileType=1;
     this.eTime=0;
 
@@ -85,6 +88,9 @@ var GAME={
 
     this.score=0;
     this.scoreImages=[];
+
+    this.speedInc=1;
+    this.movedX=0;
 
     createNewTile();
   },
@@ -128,19 +134,12 @@ var GAME={
       }
     }
     else if(this.jumpState==1) {  //이동 1
-      moveOthers(-72*game.time.physicsElapsed * this.jumpSpeed,0);
-      this.eDis+=72*game.time.physicsElapsed * this.jumpSpeed;
-      if(this.eDis>=72) {
-        moveOthers(this.eDis-72,0);
+      moveOthers(-this.oneTileX*game.time.physicsElapsed * this.jumpSpeed,0);
+      this.eDis+=this.oneTileX*game.time.physicsElapsed * this.jumpSpeed;
+      if(this.eDis>=this.oneTileX) {
+        moveOthers(this.eDis-this.oneTileX,0);
         this.jumpState=2;
         this.eDis=0;
-        var XXX=(0.2)*72*(-this.tileSpeed*this.tileDir);
-        this.moveX=-(this.newTile.x+XXX -(this.leadTileX));
-        var YYY=(0.2)*42*(this.tileSpeed*this.tileDir-this.jumpSpeed);
-        this.moveY=-(this.newTile.y+YYY -(this.leadTileY));
-        if(getAccuracy(this.moveX,this.moveY)>=2000) {
-          //this.jumpState=-1;
-        }
       }
     }
     else if(this.jumpState==-1) {
@@ -169,15 +168,13 @@ var GAME={
       }
     }
     else if(this.jumpState==2){ //이동 2
-      moveOthers(0,-42*game.time.physicsElapsed * this.jumpSpeed);  //걸린시간 :
-      this.eDis+=42*game.time.physicsElapsed * this.jumpSpeed;
-      if(this.eDis>=42) {
-        moveOthers(0,this.eDis-42);
+      moveOthers(0,-this.oneTileY*game.time.physicsElapsed * this.jumpSpeed);  //걸린시간 :
+      this.eDis+=this.oneTileY*game.time.physicsElapsed * this.jumpSpeed;
+      if(this.eDis>=this.oneTileY) {
+        moveOthers(0,this.eDis-this.oneTileY);
         this.eDis=0;
         this.jumpState=3;
-        pushNewTile(this.newTile.x,this.newTile.y);
-        this.newTile.destroy();
-        if(getAccuracy(this.moveX,this.moveY)>=2000 || this.tileType<0) {
+        if(getAccuracy()>1 || this.tileType<0) {
           this.jumpState=-1;
 
           changePlayerAnim(GAME.playerDX,GAME.playerDY,this.characterString+'Die',7,60,false);
@@ -190,12 +187,12 @@ var GAME={
           this.effect.x=this.player.x+this.player.width/2;
           this.effect.y=this.player.y+this.player.height/2;
 
-          if(getAccuracy(this.moveX,this.moveY)<500) {
+          if(getAccuracy()<0.3) {
             addScore(100);
             this.effectText=this.add.image(this.player.x+this.player.width/2,this.player.y+10,'excellent');
             this.effectText.anchor.setTo(0.5, 0.5);
           }
-          else if(getAccuracy(this.moveX,this.moveY)<2000) {
+          else{
             addScore(50);
             this.effectText=this.add.image(this.player.x+this.player.width/2,this.player.y+10,'great');
             this.effectText.anchor.setTo(0.5, 0.5);
@@ -232,7 +229,9 @@ var GAME={
       }
     }
     else if(this.jumpState==4)  { //카메라 이동
-      moveOthers(this.moveX*game.time.physicsElapsed*5, this.moveY*game.time.physicsElapsed*5);
+      this.moveX=this.tiles[this.tiles.length-1].x-this.leadTileX;
+      this.moveY=this.tiles[this.tiles.length-1].y-this.leadTileY;
+      moveOthers(-this.moveX*game.time.physicsElapsed*5, -this.moveY*game.time.physicsElapsed*5);
       if(abs(this.tiles[this.tiles.length-1].x-this.leadTileX)<3)  {
         moveOthers(-(this.tiles[this.tiles.length-1].x-this.leadTileX),-(this.tiles[this.tiles.length-1].y-this.leadTileY));
         createNewTile();
@@ -335,8 +334,8 @@ function createNewTile()  {
     GAME.tileDir=-1;
   }
 
-  var x=GAME.newTileAnswerX+72*a;
-  var y=GAME.newTileAnswerY+42*-a;
+  var x=GAME.newTileAnswerX+GAME.oneTileX*a;
+  var y=GAME.newTileAnswerY+GAME.oneTileY*-a;
   var t=Math.random();
   if(GAME.tileType>0 && t>=0.6)  {
     if(t>=0.8) {
@@ -352,10 +351,29 @@ function createNewTile()  {
     GAME.newTile=GAME.add.image(x,y,'tile');
     GAME.tileType=1;
   }
+  var s=Math.random()*1.5+GAME.defaultTileSpeed;
+  GAME.tileSpeed=s;
+  if(GAME.tileType<0)
+    GAME.tileSpeed=2*GAME.defaultTileSpeed;
+  GAME.movedX=0;
+  GAME.speedInc=Math.random()<=0.5 ? -1 : 1;
+  GAME.tileSpeed+=GAME.speedInc;
 }
 function moveNewTile()  {
-  GAME.newTile.x+=-72*game.time.physicsElapsed*GAME.tileSpeed*GAME.tileDir;
-  GAME.newTile.y+=42*game.time.physicsElapsed*GAME.tileSpeed*GAME.tileDir;
+  GAME.newTile.x+=-GAME.oneTileX*game.time.physicsElapsed*GAME.tileSpeed*GAME.tileDir;
+  GAME.movedX+=abs(GAME.oneTileX*game.time.physicsElapsed*GAME.tileSpeed*GAME.tileDir);
+  GAME.newTile.y+=GAME.oneTileY*game.time.physicsElapsed*GAME.tileSpeed*GAME.tileDir;
+  if(GAME.movedX/72>=2) {
+    GAME.speedInc=Math.random()<=0.5 ? -1 : 1;
+    if(GAME.tileSpeed>=2)
+      GAME.speedInc=1;
+    else if(GAME.tileSpeed<=8)
+      GAME.speedInc=-1;
+    GAME.tileSpeed+=GAME.speedInc*1.5;
+    GAME.movedX=0;
+
+  }
+
 }
 function moveOthers(x,y)  {
   for(i=0; i<GAME.tiles.length; i++) {
@@ -367,8 +385,8 @@ function moveOthers(x,y)  {
 }
 function pushTile(x,y,key)  {
   for(i=0; i<GAME.tiles.length; i++) {
-    GAME.tiles[i].x-=72;
-    GAME.tiles[i].y-=42;
+    GAME.tiles[i].x-=GAME.oneTileX;
+    GAME.tiles[i].y-=GAME.oneTileY;
   }
   GAME.tiles.push(GAME.add.image(GAME.leadTileX+x,GAME.leadTileY+y,key));
 }
@@ -385,6 +403,9 @@ function itemTouched(pointer) {
   {
     changePlayerAnim(GAME.playerDX,GAME.playerDY,this.characterString+'Up',7,GAME.animSpeed*GAME.fasterAnim,false);
     GAME.jumpState=0.5;
+
+    pushNewTile(this.newTile.x,this.newTile.y);
+    this.newTile.destroy();
   }
 }
 
@@ -399,8 +420,10 @@ function changePlayerAnim(x,y,key,frameNum,speed,loop) {
   }
 }
 
-function getAccuracy(x,y) {
-  return x*x+y*y;
+function getAccuracy() {
+  var x=GAME.leadTileX-GAME.tiles[GAME.tiles.length-1].x;
+  var y=GAME.leadTileY-GAME.tiles[GAME.tiles.length-1].y;
+  return abs(x/72);
 }
 function change2BG()  {
   GAME.bg2.alpha=GAME.bgAlpha;
