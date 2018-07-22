@@ -14,7 +14,7 @@ var GAME={
     this.load.image('background','assets/bg.png');
     this.load.image('background2','assets/bg2.png');
     this.load.image('background3','assets/bg3.png');
-    this.load.image('tile','assets/tile.png');
+    this.load.image('tile','assets/tile0.png');
 
     this.charList=['bird','fox','cat','dog','chip','ck'];
     for(i=0; i<this.charList.length; i++) {
@@ -49,7 +49,7 @@ var GAME={
     createClouds();
     this.oneTileX=72;
     this.oneTileY=42;
-    this.playerDX=250-this.oneTileX;
+    this.playerDX=264-this.oneTileX;  //290
     this.playerDY=546-this.oneTileY;
     this.characterString=this.charList[0];
     this.player=this.add.image(this.playerDX,this.playerDY,this.characterString+'Up');
@@ -62,12 +62,12 @@ var GAME={
     this.tileSpeed=4;
     this.fasterAnim=1.5;
     //this.newTile=this.add.image(274-72*(this.moveTime-1),648+42*(this.moveTime+1),'tile');
-    this.leadTileX=274-this.oneTileX;
-    this.leadTileY=648-this.oneTileY;
-    this.newTileAnswerX=274;
+    this.leadTileX=288-this.oneTileX; //+24
+    this.leadTileY=648-this.oneTileY; //+102
+    this.newTileAnswerX=288;
     this.newTileAnswerY=648;
     this.tileDir=1;
-    this.defaultTileSpeed=4;
+    this.defaultTileSpeed=6;
 
     this.bgType=0;
     pushTile(0,0,'tile');
@@ -91,6 +91,8 @@ var GAME={
 
     this.speedInc=1;
     this.movedX=0;
+
+    this.origSpeed=0;
 
     createNewTile();
   },
@@ -319,7 +321,7 @@ function addScore(n)  {
   var y=20;
   var k=GAME.score.toString();
   for(i=0; i<GAME.scoreImages.length; i++)
-  GAME.scoreImages[i].destroy();
+    GAME.scoreImages[i].destroy();
   GAME.scoreImages=[];
   for(i=0; i<k.length; i++) {
     GAME.scoreImages.push(GAME.add.image(x+(i*27),y,'num'+k[i]));
@@ -327,13 +329,13 @@ function addScore(n)  {
 }
 function createNewTile()  {
   var r=Math.random();
-  var a=6.2;
+  var a=7;
   GAME.tileDir=1;
   if(r>=0.5)  {
-    a=-5.8;
+    a=-6;
     GAME.tileDir=-1;
   }
-
+  GAME.speedInc=-1;
   var x=GAME.newTileAnswerX+GAME.oneTileX*a;
   var y=GAME.newTileAnswerY+GAME.oneTileY*-a;
   var t=Math.random();
@@ -355,15 +357,17 @@ function createNewTile()  {
   GAME.tileSpeed=s;
   if(GAME.tileType<0)
     GAME.tileSpeed=2*GAME.defaultTileSpeed;
-  GAME.movedX=0;
-  GAME.speedInc=Math.random()<=0.5 ? -1 : 1;
-  GAME.tileSpeed+=GAME.speedInc;
+  GAME.movedX=100;
+  GAME.origSpeed=GAME.tileSpeed;
+  //GAME.speedInc=Math.random()<=0.5 ? -1 : 1;
+  //GAME.tileSpeed+=GAME.speedInc;
 }
 function moveNewTile()  {
+  //-1~4~10
   GAME.newTile.x+=-GAME.oneTileX*game.time.physicsElapsed*GAME.tileSpeed*GAME.tileDir;
-  GAME.movedX+=abs(GAME.oneTileX*game.time.physicsElapsed*GAME.tileSpeed*GAME.tileDir);
+  //GAME.movedX+=abs(GAME.oneTileX*game.time.physicsElapsed*GAME.tileSpeed*GAME.tileDir);
   GAME.newTile.y+=GAME.oneTileY*game.time.physicsElapsed*GAME.tileSpeed*GAME.tileDir;
-  if(GAME.movedX/72>=2) {
+  /*if(GAME.movedX/72>=2) {
     GAME.speedInc=Math.random()<=0.5 ? -1 : 1;
     if(GAME.tileSpeed>=2)
       GAME.speedInc=1;
@@ -372,8 +376,30 @@ function moveNewTile()  {
     GAME.tileSpeed+=GAME.speedInc*1.5;
     GAME.movedX=0;
 
+  }*/
+  //왼쪽에서 오는것 : 2*72, 4*72 (-1)
+  //오른쪽에서 오는것 : 6*72, 4*72 (1)
+  if(GAME.tileDir==1) {
+    GAME.movedX+=GAME.speedInc*50*game.time.physicsElapsed;
+    GAME.tileSpeed=GAME.origSpeed*GAME.movedX/100;
+    if(GAME.newTile.x<=3.7*72)  {
+      GAME.speedInc=0;
+    }
+    else if(GAME.newTile.x<=4.3*72) {
+      GAME.speedInc=1;
+    }
   }
+  else if(GAME.tileDir==-1) {
+    GAME.movedX+=GAME.speedInc*50*game.time.physicsElapsed;
+    GAME.tileSpeed=GAME.origSpeed*GAME.movedX/100;
 
+    if(GAME.newTile.x>=4.3*72)  {
+      GAME.speedInc=1;
+    }
+    else if(GAME.newTile.x>=3.7*72)  {
+      GAME.speedInc=0;
+    }
+  }
 }
 function moveOthers(x,y)  {
   for(i=0; i<GAME.tiles.length; i++) {
