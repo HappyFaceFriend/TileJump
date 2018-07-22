@@ -379,27 +379,6 @@ function moveNewTile()  {
   }*/
   //왼쪽에서 오는것 : 2*72, 4*72 (-1)
   //오른쪽에서 오는것 : 6*72, 4*72 (1)
-  if(GAME.tileDir==1) {
-    GAME.movedX+=GAME.speedInc*50*game.time.physicsElapsed;
-    GAME.tileSpeed=GAME.origSpeed*GAME.movedX/100;
-    if(GAME.newTile.x<=3.7*72)  {
-      GAME.speedInc=0;
-    }
-    else if(GAME.newTile.x<=4.3*72) {
-      GAME.speedInc=1;
-    }
-  }
-  else if(GAME.tileDir==-1) {
-    GAME.movedX+=GAME.speedInc*50*game.time.physicsElapsed;
-    GAME.tileSpeed=GAME.origSpeed*GAME.movedX/100;
-
-    if(GAME.newTile.x>=4.3*72)  {
-      GAME.speedInc=1;
-    }
-    else if(GAME.newTile.x>=3.7*72)  {
-      GAME.speedInc=0;
-    }
-  }
 }
 function moveOthers(x,y)  {
   for(i=0; i<GAME.tiles.length; i++) {
