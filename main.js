@@ -140,6 +140,30 @@ var GAME={
   createNewTile(1);
   createNewTile(2);
   createClouds();
+
+
+  this.effect=AddImage(this.player.x,this.player.y,this.characterString+'Effect');
+  this.ringEffect=AddImage(this.player.x,this.player.y+190,'ringEffect');
+  this.effect.anchor.setTo(0.5, 0.5);
+  this.ringEffect.anchor.setTo(0.5, 0.5);
+  this.effect.x=this.player.x+this.player.width/2;
+  this.ringEffect.x=this.player.x+this.player.width/2;
+  this.effect.y=this.player.y+this.player.height/2;
+  this.effect.kill();
+  this.ringEffect.kill();
+
+
+  this.effectTextE=AddImage(this.player.x+this.player.width/2,this.player.y+10,'excellent');
+  this.effectTextE.anchor.setTo(0.5, 0.5);
+  this.effectTextE.kill();
+  this.effectTextG=AddImage(this.player.x+this.player.width/2,this.player.y+10,'great');
+  this.effectTextG.anchor.setTo(0.5, 0.5);
+  this.effectTextG.kill();
+  this.effectTextType=0;
+
+
+  this.surprize=AddImage(this.player.x-40,this.player.y-40,'surprize');
+  this.surprize.kill();setRenderOrder();
 },
 update: function(){
   moveBG();
@@ -148,7 +172,7 @@ update: function(){
     this.season+=1;
     if(this.season>4)
     this.season=1;
-  }
+  }/*
   if(this.score>=50 && this.bgType==0) {
     GAME.bg2=AddImage(0,0,'background2');
     this.bgType=0.5;
@@ -162,26 +186,32 @@ update: function(){
   }
   if(this.bgType==1.5)  {
     change3BG();
-  }
+  }*/
   //if(this.jumpState==0 || this.jumpState==4)
   moveNewTile();
-  game.world.bringToTop(this.player);
+  //game.world.bringToTop(this.player);
   if(this.jumpState==0) {
     for(let i=0; i<this.newTileNum; i++)  {
       if(this.tileDir[i]==1 && this.newTile[i].x<0-this.newTile[i].width){
         this.newTile[i].destroy();
         this.newTileNum-=1;
         createNewTile(i);
+        game.world.bringToTop(GAME.newTile[1]);
+        game.world.bringToTop(GAME.newTile[2]);
+        game.world.bringToTop(this.player);
       }
       else if(this.tileDir[i]==-1 && this.newTile[i].x>width+this.newTile[i].width)  {
         this.newTile[i].destroy();
         this.newTileNum-=1;
         createNewTile(i);
+        game.world.bringToTop(GAME.newTile[1]);
+        game.world.bringToTop(GAME.newTile[2]);
+        game.world.bringToTop(this.player);
       }
     }
   }
   if(this.jumpState==0.5) { //점프 버튼 누른 직후
-    this.eTime+=game.time.physicsElapsed;
+    this.eTime+=0.016;
     if(this.eTime>=7/this.animSpeed/this.fasterAnim) {
       this.eTime=0;
       this.jumpState=1;
@@ -189,8 +219,8 @@ update: function(){
     }
   }
   else if(this.jumpState==1) {  //이동 1
-    moveOthers(-this.oneTileX*game.time.physicsElapsed * this.jumpSpeed,0);
-    this.eDis+=this.oneTileX*game.time.physicsElapsed * this.jumpSpeed;
+    moveOthers(-this.oneTileX*0.016 * this.jumpSpeed,0);
+    this.eDis+=this.oneTileX*0.016 * this.jumpSpeed;
     if(this.eDis>=this.oneTileX) {
       moveOthers(this.eDis-this.oneTileX,0);
       this.jumpState=2;
@@ -198,11 +228,12 @@ update: function(){
     }
   }
   else if(this.jumpState==-1) {
-    this.eTime+=game.time.physicsElapsed;
+    this.eTime+=0.016;
     if(this.surprize.alpha>0) {
-      this.surprize.alpha-=game.time.physicsElapsed*3;
+      this.surprize.alpha-=0.016*3;
       if(this.surprize.alpha<0) {
         this.surprize.alpha=0;
+        this.surprize.kill();
       }
     }
     if(this.eTime>=0.7) {
@@ -216,15 +247,15 @@ update: function(){
   else if(this.jumpState==-2) {
     if(this.player.x>this.tiles[this.tiles.length-1].x)
     game.world.bringToTop(this.tiles[this.tiles.length-1]);
-    this.player.y+=800*game.time.physicsElapsed;
-    this.player.angle-=game.time.physicsElapsed*360*5;
+    this.player.y+=800*0.016;
+    this.player.angle-=0.016*360*5;
     if(this.player.y>height+this.player.height/2+800)  {
       this.jumpState=-3;  //게임 오버
     }
   }
   else if(this.jumpState==2){ //이동 2
-    moveOthers(0,-this.oneTileY*game.time.physicsElapsed * this.jumpSpeed);  //걸린시간 :
-    this.eDis+=this.oneTileY*game.time.physicsElapsed * this.jumpSpeed;
+    moveOthers(0,-this.oneTileY*0.016 * this.jumpSpeed);  //걸린시간 :
+    this.eDis+=this.oneTileY*0.016 * this.jumpSpeed;
     if(this.eDis>=this.oneTileY) {
       moveOthers(0,this.eDis-this.oneTileY);
       this.eDis=0;
@@ -232,73 +263,90 @@ update: function(){
       if(getAccuracy()>1 || this.tileType<0) {
         this.jumpState=-1;
 
-          changePlayerAnim('Die',60,false);
-        this.surprize=this.add.image(this.player.x-40,this.player.y-40,'surprize');
+        changePlayerAnim('Die',60,false);
+        this.surprize.revive();
+        this.surprize.alpha=1;
+        game.world.bringToTop(this.surprize);
       }
       else {
-                  changePlayerAnim('Down',this.animSpeed,false);
-        this.effect=this.add.image(this.player.x,this.player.y,this.characterString+'Effect');
-        this.ringEffect=this.add.image(this.player.x,this.player.y+190,'ringEffect');
-        this.effect.anchor.setTo(0.5, 0.5);
-        this.ringEffect.anchor.setTo(0.5, 0.5);
-        this.effect.x=this.player.x+this.player.width/2;
-        this.ringEffect.x=this.player.x+this.player.width/2;
-        this.effect.y=this.player.y+this.player.height/2;
+        changePlayerAnim('Down',40,false);
+        this.effect.revive();
+        game.world.bringToTop(this.effect);
+        this.ringEffect.revive();
+        game.world.bringToTop(this.ringEffect);
+        this.effect.alpha=1;
+        this.ringEffect.alpha=1;
 
         if(getAccuracy()<0.3) {
           addScore(100);
-          this.effectText=this.add.image(this.player.x+this.player.width/2,this.player.y+10,'excellent');
-          this.effectText.anchor.setTo(0.5, 0.5);
+          this.effectTextE.revive();
+          game.world.bringToTop(this.effectTextE);
+          this.effectTextE.alpha=1;
+          this.effectTextType=1;
+          this.effectTextE.y=this.player.y+10;
         }
         else{
           addScore(50);
-          this.effectText=this.add.image(this.player.x+this.player.width/2,this.player.y+10,'great');
-          this.effectText.anchor.setTo(0.5, 0.5);
+          this.effectTextType=2;
+          this.effectTextG.revive();
+          game.world.bringToTop(this.effectTextG);
+          this.effectTextG.y=this.player.y+10;
+          this.effectTextG.alpha=1;
         }
       }
     }
   }
   else if(this.jumpState==3)  { //잠깐 멈추는 곳 - 착지애니메이션
-    this.eTime+=game.time.physicsElapsed;
-    if(this.effectText!=null) {
-      this.effectText.alpha-=game.time.physicsElapsed*2;
-      this.effectText.y-=game.time.physicsElapsed*70;
-      game.world.bringToTop(this.effect);
+    this.eTime+=0.016;
+      this.moveX=this.tiles[this.tiles.length-1].x-this.leadTileX;
+      this.moveY=this.tiles[this.tiles.length-1].y-this.leadTileY;
+      moveOthers(-this.moveX*0.016*10, -this.moveY*0.016*10);
+    if(this.effectTextType==1) {
+      this.effectTextE.alpha-=0.016*2;
+      this.effectTextE.y-=0.016*70;
+    }
+    if(this.effectTextType==2) {
+      this.effectTextG.alpha-=0.016*2;
+      this.effectTextG.y-=0.016*70;
     }
     if(this.eTime>=0.2) {
-      this.effect.destroy();
-      this.ringEffect.destroy();
+      this.effect.kill();
+      this.ringEffect.kill();
       this.effectScale=1;
     }
     else{
-      this.effect.alpha-=game.time.physicsElapsed*5;
-      this.ringEffect.alpha-=game.time.physicsElapsed*5;
-      this.effectScale+=game.time.physicsElapsed*5;
-      this.effect.scale.setTo(this.effectScale,this.effectScale);
-      this.ringEffect.scale.setTo(this.effectScale,this.effectScale);
+      this.effect.alpha-=0.016*5;
+      this.ringEffect.alpha-=0.016*5;
+      this.effectScale+=0.016*5;
+      this.effect.scale.setTo(this.effectScale*2,this.effectScale*2);
+      this.ringEffect.scale.setTo(this.effectScale*2,this.effectScale*2);
     }
-    if(this.eTime>=0.5) {
+    if(this.eTime>=0.3) {
       this.eTime=0;
-      this.jumpState=4;
+      this.jumpState=0;
 
       changePlayerAnim('Idle',10,true);
-      if(this.effectText!=null)
-      this.effectText.destroy();
+      if(this.effectTextType==1)
+        this.effectTextE.kill();
+      else if(this.effectTextType==2)
+        this.effectTextG.kill();
+          moveOthers(-(this.tiles[this.tiles.length-1].x-this.leadTileX),-(this.tiles[this.tiles.length-1].y-this.leadTileY));
+          createNewTile(2);
     }
   }
-  else if(this.jumpState==4)  { //카메라 이동
+  /*else if(this.jumpState==4)  { //카메라 이동
     this.moveX=this.tiles[this.tiles.length-1].x-this.leadTileX;
     this.moveY=this.tiles[this.tiles.length-1].y-this.leadTileY;
-    moveOthers(-this.moveX*game.time.physicsElapsed*10, -this.moveY*game.time.physicsElapsed*10);
+    moveOthers(-this.moveX*0.016*10, -this.moveY*0.016*10);
     if(abs(this.tiles[this.tiles.length-1].x-this.leadTileX)<3)  {
       moveOthers(-(this.tiles[this.tiles.length-1].x-this.leadTileX),-(this.tiles[this.tiles.length-1].y-this.leadTileY));
       createNewTile(2);
       this.jumpState=0;
 
     }
-  }
+  }*/
 
-//  setRenderOrder();
+  //setRenderOrder();
 }
 
 }
@@ -345,33 +393,24 @@ function createClouds() {
   GAME.clouds.push(AddImage(360,270,'cloud5'));
   GAME.clouds.push(AddImage(430,90,'cloud6'));
   for(i=0; i<GAME.clouds.length; i++)  {
-    GAME.clouds[i].passed=false;
-    GAME.clouds[i].origY=GAME.clouds[i].y;
-    GAME.clouds[i].origX=GAME.clouds[i].x;
-    GAME.clouds[i].idx=i;
     GAME.clouds[i].alpha=Math.random()*0.7+0.3;
   }
 }
 function moveBG() {
   let l=GAME.clouds.length;
   for(i=0; i<GAME.clouds.length; i++) {
-    GAME.clouds[i].x-=game.time.physicsElapsed*GAME.oneTileX*GAME.cloudSpeed;
-    GAME.clouds[i].y-=game.time.physicsElapsed*GAME.oneTileY*GAME.cloudSpeed;
-    if((GAME.clouds[i].x<0 || GAME.clouds[i].y<0) && GAME.clouds[i].passed==false)  {
-      GAME.clouds[i].passed=true;
-
-      if(Math.random()>=0.5)
-      GAME.clouds.push(AddImage(width,(Math.random())*height,'cloud'+GAME.clouds[i].idx));
-      else
-      GAME.clouds.push(AddImage((Math.random())*width,height,'cloud'+GAME.clouds[i].idx));
-      GAME.clouds[GAME.clouds.length-1].idx=GAME.clouds[i].idx;
-      GAME.clouds[GAME.clouds.length-1].passed=false;
-      GAME.clouds[GAME.clouds.length-1].alpha=Math.random()*0.7+0.3;
-
-    }
+    GAME.clouds[i].x-=0.016*GAME.oneTileX*GAME.cloudSpeed;
+    GAME.clouds[i].y-=0.016*GAME.oneTileY*GAME.cloudSpeed;
     if(GAME.clouds[i].x+GAME.clouds[i].width<0) {
-      GAME.clouds[i].destroy();
-      GAME.clouds.splice(i,1);
+          if(Math.random()>=0.25)  {
+            GAME.clouds[i].x=width;
+            GAME.clouds[i].y=(Math.random())*height;
+          }
+          else  {
+            GAME.clouds[i].x=(Math.random()/2+0.5)*width;
+            GAME.clouds[i].y=height;
+          }
+          GAME.clouds[i].alpha=Math.random()*0.7+0.3;
 
     }
   }
@@ -385,7 +424,7 @@ function addScore(n)  {
   for(i=0; i<GAME.scoreImages.length; i++)
   GAME.scoreImages[i].destroy();
   GAME.scoreImages=[];
-  x-=k.length/2.0*49;
+  x-=k.length/2.0*100;
   for(i=0; i<k.length; i++) {
     GAME.scoreImages.push(AddImage(x+(i*27),y,'num'+k[i]));
   }
@@ -437,9 +476,9 @@ function createNewTile(i)  {
 function moveNewTile()  {
   //-1~4~10
   for(i=0; i<GAME.newTileNum; i++)  {
-    GAME.newTile[i].x+=-GAME.oneTileX*game.time.physicsElapsed*GAME.tileSpeed[i]*GAME.tileDir[i];
-    //GAME.movedX+=abs(GAME.oneTileX*game.time.physicsElapsed*GAME.tileSpeed*GAME.tileDir);
-    GAME.newTile[i].y+=GAME.oneTileY*game.time.physicsElapsed*GAME.tileSpeed[i]*GAME.tileDir[i];
+    GAME.newTile[i].x+=-GAME.oneTileX*0.016*GAME.tileSpeed[i]*GAME.tileDir[i];
+    //GAME.movedX+=abs(GAME.oneTileX*0.016*GAME.tileSpeed*GAME.tileDir);
+    GAME.newTile[i].y+=GAME.oneTileY*0.016*GAME.tileSpeed[i]*GAME.tileDir[i];
   }
   /*if(GAME.movedX/72>=2) {
   GAME.speedInc=Math.random()<=0.5 ? -1 : 1;
@@ -457,8 +496,8 @@ function moveNewTile(n)  {
   //-1~4~10
   for(i=0; i<GAME.newTileNum; i++)  {
     if(i!=n)  {
-      GAME.newTile[i].x+=-GAME.oneTileX*game.time.physicsElapsed*GAME.tileSpeed[i]*GAME.tileDir[i];
-      GAME.newTile[i].y+=GAME.oneTileY*game.time.physicsElapsed*GAME.tileSpeed[i]*GAME.tileDir[i];
+      GAME.newTile[i].x+=-GAME.oneTileX*0.016*GAME.tileSpeed[i]*GAME.tileDir[i];
+      GAME.newTile[i].y+=GAME.oneTileY*0.016*GAME.tileSpeed[i]*GAME.tileDir[i];
     }
   }
 }
@@ -470,7 +509,7 @@ function moveOthers(x,y)  {
 
   for(i=0; i<GAME.newTileNum; i++)  {
     GAME.newTile[i].x+=x;
-    //GAME.movedX+=abs(GAME.oneTileX*game.time.physicsElapsed*GAME.tileSpeed*GAME.tileDir);
+    //GAME.movedX+=abs(GAME.oneTileX*0.016*GAME.tileSpeed*GAME.tileDir);
     GAME.newTile[i].y+=y;
   }
 }
@@ -480,6 +519,10 @@ function pushTile(x,y,key)  {
     GAME.tiles[i].y-=GAME.oneTileY;
   }
   GAME.tiles.push(AddImage(GAME.leadTileX+x,GAME.leadTileY+y,key));
+  if(GAME.tiles.length==6){
+    GAME.tiles[5].destroy();
+    GAME.tiles.pop();
+  }
 }
 function pushNewTile(x,y) {
   if(GAME.tileType[0]==-1)
@@ -487,10 +530,11 @@ function pushNewTile(x,y) {
   else if(GAME.tileType[0]==-2)
   GAME.tiles.push(AddImage(x,y,'trap2'));
   else
-  GAME.tiles.push(AddImage(x,y,''+GAME.seasonText[GAME.season]+Math.floor(GAME.tileType[0]*10-GAME.season*10)));
+  //GAME.tiles.push(AddImage(x,y,''+GAME.seasonText[GAME.season]+Math.floor(GAME.tileType[0]*10-GAME.season*10)));
+  GAME.tiles.push(GAME.newTile[0]);
 }
 function destoryTile()  {
-  GAME.newTile[0].destroy();
+  //GAME.newTile[0].destroy();
   GAME.newTile.splice(0,1);
   GAME.newTileNum-=1;
   GAME.tileSpeed.splice(0,1);
@@ -505,6 +549,7 @@ function itemTouched(pointer) {
 
     pushNewTile(this.newTile[0].x,this.newTile[0].y);
     destoryTile();
+    game.world.bringToTop(GAME.player);
   }
 }
 
@@ -520,7 +565,7 @@ function getAccuracy() {
 }
 function change2BG()  {
   GAME.bg2.alpha=GAME.bgAlpha;
-  GAME.bgAlpha+=game.time.physicsElapsed/3;
+  GAME.bgAlpha+=0.016/3;
   if(GAME.bgAlpha>=1) {
     GAME.bgType=1;
     GAME.bg2.alpha=1;
@@ -529,7 +574,7 @@ function change2BG()  {
 }
 function change3BG()  {
   GAME.bg3.alpha=GAME.bgAlpha;
-  GAME.bgAlpha+=game.time.physicsElapsed/3;
+  GAME.bgAlpha+=0.016/3;
   if(GAME.bgAlpha>=1) {
     GAME.bgType=2;
     GAME.bg3.alpha=1;
