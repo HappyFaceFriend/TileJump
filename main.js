@@ -344,7 +344,6 @@ update: function(){
       moveOthers(-(this.tiles[this.tiles.length-1].x-this.leadTileX),-(this.tiles[this.tiles.length-1].y-this.leadTileY));
       createNewTile(2);
       this.jumpState=0;
-
     }
   }*/
 
@@ -428,7 +427,7 @@ function addScore(n)  {
   GAME.scoreImages=[];
   x-=k.length/2.0*100;
   for(i=0; i<k.length; i++) {
-    GAME.scoreImages.push(AddImage(x+(i*27),y,'num'+k[i]));
+    GAME.scoreImages.push(AddImage(x+(i*49),y,'num'+k[i]));
   }
 }
 function createNewTile(i)  {
@@ -436,7 +435,6 @@ function createNewTile(i)  {
   var a=7;
   GAME.tileDir.push(0);
   GAME.tileSpeed.push(0);
-  GAME.newTile.push(null);
   GAME.tileDir[i]=1;
   if(r>=0.5)  {
     a=-(6+i);
@@ -446,7 +444,7 @@ function createNewTile(i)  {
   var x=GAME.newTileAnswerX+GAME.oneTileX*a;
   var y=GAME.newTileAnswerY+GAME.oneTileY*-a + GAME.oneTileY*i*2;
   var t=Math.random();
-  var n=1;
+  var n=1;/*
   if(GAME.tileType[i]>0 && t>=0.8)  {
     if(t>=0.9) {
       GAME.newTile[i]=AddImage(x,y-30,'trap1');
@@ -457,7 +455,7 @@ function createNewTile(i)  {
       GAME.tileType[i]=-2;
     }
   }
-  else {
+  else {*/
     if(t>=0.6) {
       n=1;
     }
@@ -468,7 +466,7 @@ function createNewTile(i)  {
 
     GAME.newTile[i]=AddImage(x,y,''+GAME.seasonText[GAME.season]+n);
     GAME.tileType[i]=GAME.season+0.1*n;
-  }
+  //}
   var s=Math.random()*1.5+GAME.defaultTileSpeed;
   GAME.tileSpeed[i]=GAME.defaultTileSpeed;
   GAME.newTileNum+=1;
