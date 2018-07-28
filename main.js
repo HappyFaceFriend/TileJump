@@ -164,6 +164,8 @@ var GAME={
 
   this.surprize=AddImage(this.player.x-40,this.player.y-40,'surprize');
   this.surprize.kill();setRenderOrder();
+
+  this.dTime=0.04;
 },
 update: function(){
   moveBG();
@@ -211,7 +213,7 @@ update: function(){
     }
   }
   if(this.jumpState==0.5) { //점프 버튼 누른 직후
-    this.eTime+=0.16;
+    this.eTime+=this.dTime;
     if(this.eTime>=7/this.animSpeed/this.fasterAnim) {
       this.eTime=0;
       this.jumpState=1;
@@ -219,8 +221,8 @@ update: function(){
     }
   }
   else if(this.jumpState==1) {  //이동 1
-    moveOthers(-this.oneTileX*0.16 * this.jumpSpeed,0);
-    this.eDis+=this.oneTileX*0.16 * this.jumpSpeed;
+    moveOthers(-this.oneTileX*this.dTime * this.jumpSpeed,0);
+    this.eDis+=this.oneTileX*this.dTime * this.jumpSpeed;
     if(this.eDis>=this.oneTileX) {
       moveOthers(this.eDis-this.oneTileX,0);
       this.jumpState=2;
@@ -228,9 +230,9 @@ update: function(){
     }
   }
   else if(this.jumpState==-1) {
-    this.eTime+=0.16;
+    this.eTime+=this.dTime;
     if(this.surprize.alpha>0) {
-      this.surprize.alpha-=0.16*3;
+      this.surprize.alpha-=this.dTime*3;
       if(this.surprize.alpha<0) {
         this.surprize.alpha=0;
         this.surprize.kill();
@@ -247,15 +249,15 @@ update: function(){
   else if(this.jumpState==-2) {
     if(this.player.x>this.tiles[this.tiles.length-1].x)
     game.world.bringToTop(this.tiles[this.tiles.length-1]);
-    this.player.y+=800*0.16;
-    this.player.angle-=0.16*360*5;
+    this.player.y+=800*this.dTime;
+    this.player.angle-=this.dTime*360*5;
     if(this.player.y>height+this.player.height/2+800)  {
       this.jumpState=-3;  //게임 오버
     }
   }
   else if(this.jumpState==2){ //이동 2
-    moveOthers(0,-this.oneTileY*0.16 * this.jumpSpeed);  //걸린시간 :
-    this.eDis+=this.oneTileY*0.16 * this.jumpSpeed;
+    moveOthers(0,-this.oneTileY*this.dTime * this.jumpSpeed);  //걸린시간 :
+    this.eDis+=this.oneTileY*this.dTime * this.jumpSpeed;
     if(this.eDis>=this.oneTileY) {
       moveOthers(0,this.eDis-this.oneTileY);
       this.eDis=0;
@@ -297,17 +299,17 @@ update: function(){
     }
   }
   else if(this.jumpState==3)  { //잠깐 멈추는 곳 - 착지애니메이션
-    this.eTime+=0.16;
+    this.eTime+=this.dTime;
       this.moveX=this.tiles[this.tiles.length-1].x-this.leadTileX;
       this.moveY=this.tiles[this.tiles.length-1].y-this.leadTileY;
-      moveOthers(-this.moveX*0.16*10, -this.moveY*0.16*10);
+      moveOthers(-this.moveX*this.dTime*10, -this.moveY*this.dTime*10);
     if(this.effectTextType==1) {
-      this.effectTextE.alpha-=0.16*2;
-      this.effectTextE.y-=0.16*70;
+      this.effectTextE.alpha-=this.dTime*2;
+      this.effectTextE.y-=this.dTime*70;
     }
     if(this.effectTextType==2) {
-      this.effectTextG.alpha-=0.16*2;
-      this.effectTextG.y-=0.16*70;
+      this.effectTextG.alpha-=this.dTime*2;
+      this.effectTextG.y-=this.dTime*70;
     }
     if(this.eTime>=0.2) {
       this.effect.kill();
@@ -315,9 +317,9 @@ update: function(){
       this.effectScale=1;
     }
     else{
-      this.effect.alpha-=0.16*5;
-      this.ringEffect.alpha-=0.16*5;
-      this.effectScale+=0.16*5;
+      this.effect.alpha-=this.dTime*5;
+      this.ringEffect.alpha-=this.dTime*5;
+      this.effectScale+=this.dTime*5;
       this.effect.scale.setTo(this.effectScale*2,this.effectScale*2);
       this.ringEffect.scale.setTo(this.effectScale*2,this.effectScale*2);
     }
@@ -337,7 +339,7 @@ update: function(){
   /*else if(this.jumpState==4)  { //카메라 이동
     this.moveX=this.tiles[this.tiles.length-1].x-this.leadTileX;
     this.moveY=this.tiles[this.tiles.length-1].y-this.leadTileY;
-    moveOthers(-this.moveX*0.16*10, -this.moveY*0.16*10);
+    moveOthers(-this.moveX*this.dTime*10, -this.moveY*this.dTime*10);
     if(abs(this.tiles[this.tiles.length-1].x-this.leadTileX)<3)  {
       moveOthers(-(this.tiles[this.tiles.length-1].x-this.leadTileX),-(this.tiles[this.tiles.length-1].y-this.leadTileY));
       createNewTile(2);
@@ -399,8 +401,8 @@ function createClouds() {
 function moveBG() {
   let l=GAME.clouds.length;
   for(i=0; i<GAME.clouds.length; i++) {
-    GAME.clouds[i].x-=0.16*GAME.oneTileX*GAME.cloudSpeed;
-    GAME.clouds[i].y-=0.16*GAME.oneTileY*GAME.cloudSpeed;
+    GAME.clouds[i].x-=this.dTime*GAME.oneTileX*GAME.cloudSpeed;
+    GAME.clouds[i].y-=this.dTime*GAME.oneTileY*GAME.cloudSpeed;
     if(GAME.clouds[i].x+GAME.clouds[i].width<0) {
           if(Math.random()>=0.25)  {
             GAME.clouds[i].x=width;
@@ -476,9 +478,9 @@ function createNewTile(i)  {
 function moveNewTile()  {
   //-1~4~10
   for(i=0; i<GAME.newTileNum; i++)  {
-    GAME.newTile[i].x+=-GAME.oneTileX*0.16*GAME.tileSpeed[i]*GAME.tileDir[i];
-    //GAME.movedX+=abs(GAME.oneTileX*0.16*GAME.tileSpeed*GAME.tileDir);
-    GAME.newTile[i].y+=GAME.oneTileY*0.16*GAME.tileSpeed[i]*GAME.tileDir[i];
+    GAME.newTile[i].x+=-GAME.oneTileX*this.dTime*GAME.tileSpeed[i]*GAME.tileDir[i];
+    //GAME.movedX+=abs(GAME.oneTileX*this.dTime*GAME.tileSpeed*GAME.tileDir);
+    GAME.newTile[i].y+=GAME.oneTileY*this.dTime*GAME.tileSpeed[i]*GAME.tileDir[i];
   }
   /*if(GAME.movedX/72>=2) {
   GAME.speedInc=Math.random()<=0.5 ? -1 : 1;
@@ -496,8 +498,8 @@ function moveNewTile(n)  {
   //-1~4~10
   for(i=0; i<GAME.newTileNum; i++)  {
     if(i!=n)  {
-      GAME.newTile[i].x+=-GAME.oneTileX*0.16*GAME.tileSpeed[i]*GAME.tileDir[i];
-      GAME.newTile[i].y+=GAME.oneTileY*0.16*GAME.tileSpeed[i]*GAME.tileDir[i];
+      GAME.newTile[i].x+=-GAME.oneTileX*this.dTime*GAME.tileSpeed[i]*GAME.tileDir[i];
+      GAME.newTile[i].y+=GAME.oneTileY*this.dTime*GAME.tileSpeed[i]*GAME.tileDir[i];
     }
   }
 }
@@ -509,7 +511,7 @@ function moveOthers(x,y)  {
 
   for(i=0; i<GAME.newTileNum; i++)  {
     GAME.newTile[i].x+=x;
-    //GAME.movedX+=abs(GAME.oneTileX*0.16*GAME.tileSpeed*GAME.tileDir);
+    //GAME.movedX+=abs(GAME.oneTileX*this.dTime*GAME.tileSpeed*GAME.tileDir);
     GAME.newTile[i].y+=y;
   }
 }
@@ -565,7 +567,7 @@ function getAccuracy() {
 }
 function change2BG()  {
   GAME.bg2.alpha=GAME.bgAlpha;
-  GAME.bgAlpha+=0.16/3;
+  GAME.bgAlpha+=this.dTime/3;
   if(GAME.bgAlpha>=1) {
     GAME.bgType=1;
     GAME.bg2.alpha=1;
@@ -574,7 +576,7 @@ function change2BG()  {
 }
 function change3BG()  {
   GAME.bg3.alpha=GAME.bgAlpha;
-  GAME.bgAlpha+=0.16/3;
+  GAME.bgAlpha+=this.dTime/3;
   if(GAME.bgAlpha>=1) {
     GAME.bgType=2;
     GAME.bg3.alpha=1;
