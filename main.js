@@ -401,8 +401,8 @@ function createClouds() {
 function moveBG() {
   let l=GAME.clouds.length;
   for(i=0; i<GAME.clouds.length; i++) {
-    GAME.clouds[i].x-=this.dTime*GAME.oneTileX*GAME.cloudSpeed;
-    GAME.clouds[i].y-=this.dTime*GAME.oneTileY*GAME.cloudSpeed;
+    GAME.clouds[i].x-=GAME.dTime*GAME.oneTileX*GAME.cloudSpeed;
+    GAME.clouds[i].y-=GAME.dTime*GAME.oneTileY*GAME.cloudSpeed;
     if(GAME.clouds[i].x+GAME.clouds[i].width<0) {
           if(Math.random()>=0.25)  {
             GAME.clouds[i].x=width;
@@ -478,9 +478,9 @@ function createNewTile(i)  {
 function moveNewTile()  {
   //-1~4~10
   for(i=0; i<GAME.newTileNum; i++)  {
-    GAME.newTile[i].x+=-GAME.oneTileX*this.dTime*GAME.tileSpeed[i]*GAME.tileDir[i];
+    GAME.newTile[i].x+=-GAME.oneTileX*GAME.dTime*GAME.tileSpeed[i]*GAME.tileDir[i];
     //GAME.movedX+=abs(GAME.oneTileX*this.dTime*GAME.tileSpeed*GAME.tileDir);
-    GAME.newTile[i].y+=GAME.oneTileY*this.dTime*GAME.tileSpeed[i]*GAME.tileDir[i];
+    GAME.newTile[i].y+=GAME.oneTileY*GAME.dTime*GAME.tileSpeed[i]*GAME.tileDir[i];
   }
   /*if(GAME.movedX/72>=2) {
   GAME.speedInc=Math.random()<=0.5 ? -1 : 1;
@@ -498,8 +498,8 @@ function moveNewTile(n)  {
   //-1~4~10
   for(i=0; i<GAME.newTileNum; i++)  {
     if(i!=n)  {
-      GAME.newTile[i].x+=-GAME.oneTileX*this.dTime*GAME.tileSpeed[i]*GAME.tileDir[i];
-      GAME.newTile[i].y+=GAME.oneTileY*this.dTime*GAME.tileSpeed[i]*GAME.tileDir[i];
+      GAME.newTile[i].x+=-GAME.oneTileX*GAME.dTime*GAME.tileSpeed[i]*GAME.tileDir[i];
+      GAME.newTile[i].y+=GAME.oneTileY*GAME.dTime*GAME.tileSpeed[i]*GAME.tileDir[i];
     }
   }
 }
@@ -567,7 +567,7 @@ function getAccuracy() {
 }
 function change2BG()  {
   GAME.bg2.alpha=GAME.bgAlpha;
-  GAME.bgAlpha+=this.dTime/3;
+  GAME.bgAlpha+=GAME.dTime/3;
   if(GAME.bgAlpha>=1) {
     GAME.bgType=1;
     GAME.bg2.alpha=1;
@@ -576,7 +576,7 @@ function change2BG()  {
 }
 function change3BG()  {
   GAME.bg3.alpha=GAME.bgAlpha;
-  GAME.bgAlpha+=this.dTime/3;
+  GAME.bgAlpha+=GAME.dTime/3;
   if(GAME.bgAlpha>=1) {
     GAME.bgType=2;
     GAME.bg3.alpha=1;
