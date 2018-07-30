@@ -9,81 +9,141 @@ var height=1100;
 var width=720;
 var game =new Phaser.Game(width,height,Phaser.CANVAS, 'ld29', null, false, false);
 
-game.state.add('loadst',LOAD)
-game.state.add('titlest',TITLE);
-game.state.add('charselectst',CHARSELECT);
-game.state.add('gamest',GAME);
-game.state.add('overst',OVER);
+var charId=0;
 
-var charId=1;
-
-game.state.start('titlest');
+var charLock=[true,true,true,true,true,true];
 
 var LOAD={
-
     preload:  function(){
-    }
-    create:   function(){
-    }
-    update: function(){
+    game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+    game.scale.refresh();
+      game.load.image('background','assets/bg.png');
+        game.load.image('background2','assets/bg2.jpg');
+      game.load.image('background3','assets/bg3.jpg');
 
+      this.charList=['owl','fox','cat','dog','chip','ck'];
+      for(i=0; i<this.charList.length; i++) {
+        let s=this.charList[i];
+        game.load.image(s+'Effect','assets/characters/'+s+'effect.png',170,170,1);
+        game.load.spritesheet(s+'Idle','assets/characters/'+s+'idle.png',170, 170, 10);
+        game.load.spritesheet(s+'Up','assets/characters/'+s+'1.png',170, 170, 4);
+        game.load.spritesheet(s+'Down','assets/characters/'+s+'2.png',170, 170, 4);
+        game.load.spritesheet(s+'Die','assets/characters/'+s+'death.png',170, 170, 7);
+        game.load.spritesheet(s+'Fly','assets/characters/'+s+'fly.png',170,170,12);
+      }
+      game.load.image('cloud0','assets/cloud/0.png');
+      game.load.image('cloud1','assets/cloud/1.png');
+      game.load.image('cloud2','assets/cloud/2.png');
+      game.load.image('cloud3','assets/cloud/3.png');
+      game.load.image('cloud4','assets/cloud/4.png');
+      game.load.image('cloud5','assets/cloud/5.png');
+      game.load.image('cloud6','assets/cloud/6.png');
+      game.load.image('great','assets/great.png');
+      game.load.image('excellent','assets/excellent.png');
+      for(i=0; i<10; i++)
+      game.load.image('num'+i,'assets/number/'+i+'.png');
+      game.load.spritesheet('trap','assets/trapsprite.png',180,180,20);
+      game.load.image('surprize','assets/surprize.png');
+
+      game.load.image('spring1','assets/spring/1.png');
+      game.load.image('spring2','assets/spring/2.png');
+      game.load.image('spring3','assets/spring/3.png');
+      game.load.image('summer1','assets/summer/1.png');
+      game.load.image('summer2','assets/summer/2.png');
+      game.load.image('summer3','assets/summer/3.png');
+      game.load.image('fall1','assets/fall/1.png');
+      game.load.image('fall2','assets/fall/2.png');
+      game.load.image('fall3','assets/fall/3.png');
+      game.load.image('winter1','assets/winter/1.png');
+      game.load.image('winter2','assets/winter/2.png');
+      game.load.image('winter3','assets/winter/3.png');
+
+
+      game.load.image('ringEffect','assets/effect.png');
+
+      game.load.image('pauseBg','assets/pauseBg.png');
+      game.load.image('pauseButton','assets/pause.png');
+      game.load.image('restartButton','assets/restart.png');
+
+      game.load.image('startButtonMain','assets/main/start.png')
+      game.load.image('bgMain','assets/main/bg.png');
+      game.load.image('startButtonSelect','assets/select/gamestart.png')
+
+      game.load.image('1on','assets/select/1on.png');
+      for(let i=2; i<=6; i++) {
+        game.load.image(''+i+'on','assets/select/'+i+'on.png');
+        game.load.image(''+i+'off','assets/select/'+i+'off.png');
+      }
+
+    },
+    create:   function(){
+      game.state.start('titlest');
+    },
+    update: function(){}
+};
+var TITLE={
+    preload:  function(){},
+    create:   function(){
+      this.bg=game.add.image(0,0,'bgMain');
+      this.startButton=game.add.button(49,1109-180,'startButtonMain', startOnClilckMain, this);
+    },
+    update: function(){
+    }
+};
+function startOnClilckMain(){
+  game.state.start('charselectst');
+}
+var CHARSELECT={
+    preload:  function(){},
+    create:   function(){
+      this.bg=game.add.image(0,0,'bgMain');
+      this.startButton=game.add.button(217,1112-180,'startButtonSelect', startOnClilckSelect, this);
+
+      this.selectButtons=[];
+      for(let i=1; i<=6; i++) {
+        if(charLock[i-1]) {
+          let idx=i;
+          this.selectButtons.push(game.add.button(13+236*((i-1)%3),244+336*Math.round((i-2)/3),''+i+'on',selBut[i-1],this));
+        } else {
+          let idx=i;
+          this.selectButtons.push(game.add.button(13+236*((i-1)%3),244+336*Math.round((i-2)/3),''+i+'off',notBut,this));
+        }
+      }
+    },
+    update: function(){
+    }
+};
+function notBut() {
 
 }
+var selBut=[];
+selBut.push(function selBut1(){charId=0;});
+selBut.push(function selBut2(){charId=1;});
+selBut.push(function selBut3(){charId=2;});
+selBut.push(function selBut4(){charId=3;});
+selBut.push(function selBut5(){charId=4;});
+selBut.push(function selBut6(){charId=5;});
+function startOnClilckSelect(){
+  game.state.start('gamest');
+}
+function getCharId()  {
+  return charId;
+}
+var OVER={
+
+    preload:  function(){
+    },
+    create:   function(){
+    },
+    update: function(){
+    }
+};
 
 var GAME={
   preload:  function(){
-    this.load.image('background','assets/bg.png');
-      this.load.image('background2','assets/bg2.jpg');
-    this.load.image('background3','assets/bg3.jpg');
-
-    this.charList=['owl','fox','cat','dog','chip','ck'];
-    for(i=0; i<this.charList.length; i++) {
-      let s=this.charList[i];
-      this.load.image(s+'Effect','assets/characters/'+s+'effect.png',170,170,1);
-      this.load.spritesheet(s+'Idle','assets/characters/'+s+'idle.png',170, 170, 10);
-      this.load.spritesheet(s+'Up','assets/characters/'+s+'1.png',170, 170, 4);
-      this.load.spritesheet(s+'Down','assets/characters/'+s+'2.png',170, 170, 4);
-      this.load.spritesheet(s+'Die','assets/characters/'+s+'death.png',170, 170, 7);
-      this.load.spritesheet(s+'Fly','assets/characters/'+s+'fly.png',170,170,12);
-    }
-    this.load.image('cloud0','assets/cloud/0.png');
-    this.load.image('cloud1','assets/cloud/1.png');
-    this.load.image('cloud2','assets/cloud/2.png');
-    this.load.image('cloud3','assets/cloud/3.png');
-    this.load.image('cloud4','assets/cloud/4.png');
-    this.load.image('cloud5','assets/cloud/5.png');
-    this.load.image('cloud6','assets/cloud/6.png');
-    this.load.image('great','assets/great.png');
-    this.load.image('excellent','assets/excellent.png');
-    for(i=0; i<10; i++)
-    this.load.image('num'+i,'assets/number/'+i+'.png');
-    this.load.spritesheet('trap','assets/trapsprite.png',180,180,20);
-    this.load.image('surprize','assets/surprize.png');
-
-    this.load.image('spring1','assets/spring/1.png');
-    this.load.image('spring2','assets/spring/2.png');
-    this.load.image('spring3','assets/spring/3.png');
-    this.load.image('summer1','assets/summer/1.png');
-    this.load.image('summer2','assets/summer/2.png');
-    this.load.image('summer3','assets/summer/3.png');
-    this.load.image('fall1','assets/fall/1.png');
-    this.load.image('fall2','assets/fall/2.png');
-    this.load.image('fall3','assets/fall/3.png');
-    this.load.image('winter1','assets/winter/1.png');
-    this.load.image('winter2','assets/winter/2.png');
-    this.load.image('winter3','assets/winter/3.png');
-
-
-    this.load.image('ringEffect','assets/effect.png');
-
-    this.load.image('pauseBg','assets/pauseBg.png');
-    this.load.image('pauseButton','assets/pause.png');
-    this.load.image('restartButton','assets/restart.png');
-    this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-    game.scale.refresh();
-
   },
   create:   function(){
+        this.charList=['owl','fox','cat','dog','chip','ck'];
     this.gameState=0;
     //this.bg=AddImage(0,0,'background');
     this.bg=AddImage(0,0,'background');
@@ -115,7 +175,7 @@ var GAME={
     this.oneTileY=42;
     this.playerDX=270-this.oneTileX;  //290
     this.playerDY=554-this.oneTileY;
-    this.characterString=this.charList[charId];
+    this.characterString=this.charList[getCharId()];
     this.player=AddImage(this.playerDX,this.playerDY,this.characterString+'Effect');
 
     this.player.loadTexture(this.characterString+'Idle', 0);
@@ -686,3 +746,11 @@ function moveBG() {
   }
 
 }
+
+game.state.add('loadst',LOAD)
+game.state.add('titlest',TITLE);
+game.state.add('charselectst',CHARSELECT);
+game.state.add('gamest',GAME);
+game.state.add('overst',OVER);
+
+game.state.start('loadst');
