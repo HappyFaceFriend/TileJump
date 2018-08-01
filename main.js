@@ -5,8 +5,9 @@ var clientWidth = function () {
 var clientHeight = function () {
   return Math.max(window.innerHeight, document.documentElement.clientHeight);
 };
-var height=1100;
+var height=1180;
 var width=720;
+var tabSize=90;
 var game =new Phaser.Game(width,height,Phaser.CANVAS, 'ld29', null, false, false);
 
 var charId=0;
@@ -15,13 +16,14 @@ var charLock=[true,true,true,true,true,true];
 
 var LOAD={
     preload:  function(){
-    game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+      game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT;
+    game.scale.scaleMode = Phaser.ScaleManager.EXACT_FIT;
     game.scale.refresh();
       game.load.image('background','assets/bg.png');
         game.load.image('background2','assets/bg2.jpg');
       game.load.image('background3','assets/bg3.jpg');
 
-      this.charList=['owl','fox','cat','dog','chip','ck'];
+      this.charList=['owl','fox','cat','chip','ck','dog'];
       for(i=0; i<this.charList.length; i++) {
         let s=this.charList[i];
         game.load.image(s+'Effect','assets/characters/'+s+'effect.png',170,170,1);
@@ -67,6 +69,18 @@ var LOAD={
 
       game.load.image('startButtonMain','assets/main/start.png')
       game.load.image('bgMain','assets/main/bg.png');
+      game.load.image('boardMain','assets/main/board.png');
+      game.load.image('creditMain','assets/main/credit.png');
+      game.load.image('helpMain','assets/main/help.png');
+      game.load.image('logoMain','assets/main/logo.png');
+      game.load.image('logobgMain','assets/main/logobg.png');
+      game.load.image('menuMain','assets/main/menu.png');
+      game.load.image('patternMain','assets/main/pattern.png');
+      game.load.image('soundOffMain','assets/main/soundoff.png');
+      game.load.image('soundOnMain','assets/main/soundon.png');
+      game.load.image('tileMain','assets/main/tile.png');
+      game.load.image('rankingStartMain','assets/main/rankingstart.png');
+
       game.load.image('startButtonSelect','assets/select/gamestart.png')
 
       game.load.image('1on','assets/select/1on.png');
@@ -74,6 +88,25 @@ var LOAD={
         game.load.image(''+i+'on','assets/select/'+i+'on.png');
         game.load.image(''+i+'off','assets/select/'+i+'off.png');
       }
+      game.load.image('textSelect','assets/select/text.png');
+
+      game.load.image('bgOver','assets/over/bg.png');
+      game.load.image('restartOver','assets/over/re.png');
+      game.load.image('1stOver','assets/over/1st.png');
+      game.load.image('2ndOver','assets/over/2nd.png');
+      game.load.image('3rdOver','assets/over/3rd.png');
+      game.load.image('allrankingOver','assets/over/allranking.png');
+      game.load.image('bar1Over','assets/over/bar1.png');
+      game.load.image('bar2Over','assets/over/bar2.png');
+      game.load.image('bestOver','assets/over/best.png');
+      game.load.image('boardOver','assets/over/board.png');
+      game.load.image('bragOver','assets/over/brag.png');
+      game.load.image('friendrankingOver','assets/over/friendranking.png');
+      game.load.image('lowerOver','assets/over/lower.png');
+
+      game.load.image('closeButton','assets/help/close.png');
+      game.load.image('textHelp','assets/help/text.png');
+      game.load.image('textCredit','assets/credit/text.png');
 
     },
     create:   function(){
@@ -81,61 +114,126 @@ var LOAD={
     },
     update: function(){}
 };
+var patternSpeed=40;
+function movePattern(p1,p2) {
+  p1.x+=patternSpeed*game.time.physicsElapsed;
+  p2.x+=patternSpeed*game.time.physicsElapsed;
+  if(p1.x>p1.width)
+    p1.x-=p1.width*2;
+  if(p2.x>p1.width)
+    p2.x-=p1.width*2;
+}
 var TITLE={
     preload:  function(){},
     create:   function(){
       this.bg=game.add.image(0,0,'bgMain');
-      this.startButton=game.add.button(49,1109-180,'startButtonMain', startOnClilckMain, this);
+      this.pattern1=game.add.image(0,0,'patternMain');
+      this.pattern2=game.add.image(this.pattern1.width,0,'patternMain');
+      this.startButton=game.add.button(49,1109-tabSize,'startButtonMain', startOnClilckMain, this);
+      this.helpButton=game.add.button(32,164-40-tabSize,'helpMain', helpOnClickMain, this);
+      this.creditButton=game.add.button(122,164-40-tabSize,'creditMain', creditOnClickMain, this);
+      this.soundButton=game.add.button(width-110,164-40-tabSize,'soundOnMain',soundOnClickMain,this);
+      this.rankingButton=game.add.button(368,1109-tabSize,'rankingStartMain', rankingOnClickMain, this);
+      this.board=game.add.image(0,0-tabSize,'boardMain');
+      this.tile=game.add.image(53,571-tabSize,'tileMain');
+      this.logobg=game.add.image(85,141-tabSize+50,'logobgMain');
+      this.logo=game.add.image(108,161-tabSize+50,'logoMain');
+
+      this.logoMove=50;
+      this.ceta=0;
+      this.moveSpeed=Math.PI*0.7;
     },
     update: function(){
+      movePattern(this.pattern1,this.pattern2);
+      this.logo.y=161-tabSize+50+this.logoMove*(Math.sin(this.ceta))/2;
+      this.ceta+=this.moveSpeed*game.time.physicsElapsed;
     }
 };
 function startOnClilckMain(){
   game.state.start('charselectst');
 }
+function helpOnClickMain(){
+  game.state.start('helpst');
+}
+function rankingOnClickMain(){
+}
+function soundOnClickMain(){
+}
+function creditOnClickMain(){
+  game.state.start('creditst');
+}
 var CHARSELECT={
     preload:  function(){},
     create:   function(){
-      this.bg=game.add.image(0,0,'bgMain');
-      this.startButton=game.add.button(217,1112-180,'startButtonSelect', startOnClilckSelect, this);
+      this.dy=tabSize;
+      this.bg=game.add.image(0,-this.dy,'bgMain');
+      this.pattern1=game.add.image(0,0,'patternMain');
+      this.pattern2=game.add.image(this.pattern1.width,0,'patternMain');
+      this.startButton=game.add.button(217,1112-tabSize,'startButtonSelect', startOnClilckSelect, this);
 
       this.selectButtons=[];
       for(let i=1; i<=6; i++) {
         if(charLock[i-1]) {
           let idx=i;
-          this.selectButtons.push(game.add.button(13+236*((i-1)%3),244+336*Math.round((i-2)/3),''+i+'on',selBut[i-1],this));
+          this.selectButtons.push(game.add.button(13+236*((i-1)%3),244+336*Math.round((i-2)/3)-this.dy,''+i+'on',selBut(i-1),this));
         } else {
           let idx=i;
-          this.selectButtons.push(game.add.button(13+236*((i-1)%3),244+336*Math.round((i-2)/3),''+i+'off',notBut,this));
+          this.selectButtons.push(game.add.button(13+236*((i-1)%3),244+336*Math.round((i-2)/3)-this.dy,''+i+'off',notBut,this));
         }
       }
+      this.bg=game.add.image(43,167-this.dy,'textSelect');
     },
     update: function(){
+      movePattern(this.pattern1,this.pattern2);
     }
 };
 function notBut() {
 
 }
-var selBut=[];
-selBut.push(function selBut1(){charId=0;});
-selBut.push(function selBut2(){charId=1;});
-selBut.push(function selBut3(){charId=2;});
-selBut.push(function selBut4(){charId=3;});
-selBut.push(function selBut5(){charId=4;});
-selBut.push(function selBut6(){charId=5;});
+var selBut=function(id) {
+  return function(){
+    charId=id;
+  }
+}
+
+
 function startOnClilckSelect(){
   game.state.start('gamest');
 }
 function getCharId()  {
   return charId;
 }
-var OVER={
+function closeOnClick() {
+  game.state.start('titlest');
+}
 
-    preload:  function(){
-    },
+var HELP={
+    preload:  function(){},
     create:   function(){
+      this.dy=tabSize;
+      this.bg=game.add.image(0,-this.dy,'bgMain');
+      this.pattern1=game.add.image(0,0,'patternMain');
+      this.pattern2=game.add.image(this.pattern1.width,0,'patternMain');
+      this.closeButton=game.add.button(32,164-40-tabSize,'closeButton', closeOnClick, this);
+      this.text=game.add.image(50,146-tabSize,'textHelp');
+      this.text.scale.setTo(0.85,0.85);
     },
     update: function(){
+      movePattern(this.pattern1,this.pattern2);
+    }
+};
+var CREDIT={
+    preload:  function(){},
+    create:   function(){
+      this.dy=tabSize;
+      this.bg=game.add.image(0,-this.dy,'bgMain');
+      this.pattern1=game.add.image(0,0,'patternMain');
+      this.pattern2=game.add.image(this.pattern1.width,0,'patternMain');
+      this.closeButton=game.add.button(32,164-40-tabSize,'closeButton', closeOnClick, this);
+      this.text=game.add.image(150,176-tabSize,'textCredit');
+    },
+    update: function(){
+      movePattern(this.pattern1,this.pattern2);
     }
 };
 
@@ -151,12 +249,12 @@ var GAME={
     this.pauseBG.kill();
 
     this.pauseButton = game.add.button(width-40,40, 'pauseButton', pauseOnClick, this);
-    this.pauseButton.scale.set(1.5,1.5);
+    this.pauseButton.scale.set(1,1);
     this.pauseButton.x-=this.pauseButton.width;
     this.touchOnUI=false;
     this.resumeButton = game.add.button(width/2,height/2, 'restartButton', pauseOnClick, this);
     this.resumeButton.anchor.setTo(0.5,0.5);
-    this.resumeButton.scale.set(1.5,1.5);
+    this.resumeButton.scale.set(1,1);
     this.resumeButton.kill();
 
 
@@ -307,6 +405,7 @@ if(this.bgType==1.5)  {
 change3BG();
 }*/
 //if(this.jumpState==0 || this.jumpState==4)
+if(this.jumpState!=-3)
 moveNewTile();
 //game.world.bringToTop(this.player);
 if(this.gameState==0) {
@@ -419,9 +518,33 @@ if(this.gameState==0) {
       createNewTile(this.newTile.length);
     }
   }
+  else if(this.jumpState==-3)  {
+    this.overBG=AddImage(0,0,'bgOver');
+    this.board=AddImage(108,345,'boardOver');
+    this.best=AddImage(149,337,'bestOver');
+    this.allranking=AddImage(136,515,'allrankingOver');
+    this.friendranking=AddImage(359,515,'friendrankingOver');
+    this.lower=AddImage(138,813,'lowerOver');
+    this.bar1=AddImage(140,611,'bar1Over');
+    this.bar2=AddImage(140,667,'bar2Over');
+    this.first=AddImage(155,618,'1stOver');
+    this.second=AddImage(155,674,'2ndOver');
+    this.third=AddImage(155,730,'3rdOver');
+
+    this.pauseButton = game.add.button(377,933, 'restartOver', restartGame, this);
+    this.bragButton = game.add.button(106,933, 'bragOver', bragOver, this);
+    this.jumpState=-4;
+  }
 }
 updateEffects();
+if(this.jumpState>=0)
+setRenderOrder();
 }
+}
+function restartGame()  {
+  game.state.start('titlest');
+}
+function bragOver() {
 
 }
 function activateEffects() {
@@ -448,32 +571,33 @@ function activateEffects() {
 }
 function updateEffects(type) {
 
-  if(GAME.effectTextE.alive==true && GAME.effectTextType==1) {
-    GAME.effectTextE.alpha-=GAME.dTime*2;
+  if(GAME.effectTextE.alive==true) {
+    GAME.effectTextE.alpha-=GAME.dTime*3;
     GAME.effectTextE.y-=GAME.dTime*70;
     if(GAME.effectTextE.alpha-GAME.dTime*2<=0)
-    GAME.effectTextE.kill();
+      GAME.effectTextE.kill();
   }
-  if(GAME.effectTextG.alive==true && GAME.effectTextType==2) {
-    GAME.effectTextG.alpha-=GAME.dTime*2;
+  if(GAME.effectTextG.alive==true) {
+    GAME.effectTextG.alpha-=GAME.dTime*3;
     GAME.effectTextG.y-=GAME.dTime*70;
     if(GAME.effectTextG.alpha-GAME.dTime*2<=0)
-    GAME.effectTextG.kill();
+      GAME.effectTextG.kill();
   }
   if(GAME.effect.alive==true) {
     GAME.effect.alpha-=GAME.dTime*4;
     GAME.effectScale+=GAME.dTime*5;
-    GAME.effect.scale.setTo(GAME.effectScale*2,GAME.effectScale*2);
-    if(GAME.effect.alpha-GAME.dTime*5<=0.3)  {
-      GAME.effectScale=0;
+    GAME.effect.scale.setTo(GAME.effectScale,GAME.effectScale);
+    if(GAME.effect.alpha-GAME.dTime*4<=0)  {
       GAME.effect.kill();
     }
   }
-  if(GAME.ringEffect.alive==true)
-  GAME.ringEffect.alpha-=GAME.dTime*4;
-  GAME.ringEffect.scale.setTo(GAME.effectScale*2,GAME.effectScale*2);
-  if(GAME.ringEffect.alpha-GAME.dTime*5<=0.3)  {
-    GAME.ringEffect.kill();
+  if(GAME.ringEffect.alive==true) {
+    GAME.ringEffect.alpha-=GAME.dTime*3;
+    GAME.ringEffect.scale.setTo(GAME.effectScale,GAME.effectScale);
+    if(GAME.ringEffect.alpha-GAME.dTime*3<=0)  {
+      GAME.ringEffect.kill();
+        GAME.effectScale=0;
+    }
   }
 }
 function addScore(n)  {
@@ -484,10 +608,10 @@ function addScore(n)  {
   for(let i=0; i<GAME.scoreImages.length; i++)
   GAME.scoreImages[i].destroy();
   GAME.scoreImages=[];
-  x-=k.length/2.0*49;
+  x-=k.length/2.0*50;
   //x=200;
   for(let i=0; i<k.length; i++) {
-    GAME.scoreImages.push(AddImage(x+(i*49),y,'num'+k[i]));
+    GAME.scoreImages.push(AddImage(x+(i*50),y,'num'+k[i]));
   }
 }
 function resetNewTile(i)  {
@@ -694,7 +818,7 @@ function setRenderOrder() {
   for(i=0; i<GAME.tiles.length; i++)
   game.world.bringToTop(GAME.tiles[i]);
 
-  for(i=0; i<3; i++)
+  for(i=0; i<GAME.newTile.length; i++)
   game.world.bringToTop(GAME.newTile[i]);
 
   for(i=0; i<GAME.scoreImages.length; i++)
@@ -702,15 +826,10 @@ function setRenderOrder() {
   if(GAME.effectText!=null)
   game.world.bringToTop(GAME.effectText);
 
-  if(GAME.ringEffect!=null)
   game.world.bringToTop(GAME.ringEffect);
   game.world.bringToTop(GAME.player);
-  if(GAME.playerFlyAnim!=null)
-  game.world.bringToTop(GAME.playerFlyAnim);
 
-  if(GAME.effect!=null)
   game.world.bringToTop(GAME.effect);
-  if(GAME.surprize!=null)
   game.world.bringToTop(GAME.surprize);
 
 }
@@ -749,8 +868,9 @@ function moveBG() {
 
 game.state.add('loadst',LOAD)
 game.state.add('titlest',TITLE);
+game.state.add('creditst',CREDIT);
+game.state.add('helpst',HELP);
 game.state.add('charselectst',CHARSELECT);
 game.state.add('gamest',GAME);
-game.state.add('overst',OVER);
 
 game.state.start('loadst');
