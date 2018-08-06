@@ -1,4 +1,4 @@
-import {ListView} from "/phaser-list-view.js"
+//import {ListView} from "/phaser-list-view.js"
 
 var clientWidth = function() {
   return Math.max(window.innerWidth, document.documentElement.clientWidth);
@@ -13,8 +13,17 @@ var game = new Phaser.Game(width, height, Phaser.CANVAS, 'ld29', null, false, fa
 
 var charId = 0;
 
-var charLock = [true, true, true, true, true, true];
+var charLock = [true, false, false, false, false, false];
 
+var charlockCond = [0, 500, 2000, 4000, 10000, 20000];
+
+var fallSound;
+var jumpSound;
+var clickSound;
+var mainSound;
+var downSound;
+var gameSound;
+var excellentSound;
 var LOAD = {
   preload: function() {
     game.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL;
@@ -25,40 +34,43 @@ var LOAD = {
 
     this.charList = ['owl', 'fox', 'cat', 'chip', 'ck', 'dog'];
 
-        for (i = 0; i < this.charList.length; i++) {
-          let s = this.charList[i];
-          game.load.image(s + 'Effect', 'assets/characters/' + s + 'effect.png', 170, 170, 1);
-          game.load.spritesheet(s + 'Idle', 'assets/characters/' + s + 'idle.png', 170, 170, 10);
-          game.load.spritesheet(s + 'Up', 'assets/characters/' + s + '1.png', 170, 170, 4);
-          game.load.spritesheet(s + 'Down', 'assets/characters/' + s + '2.png', 170, 170, 4);
-          game.load.spritesheet(s + 'Die', 'assets/characters/' + s + 'death.png', 170, 170, 7);
-          game.load.spritesheet(s + 'Fly', 'assets/characters/' + s + 'fly.png', 170, 170, 12);
-        }
+    for (let i = 0; i < this.charList.length; i++) {
+      let s = this.charList[i];
+      game.load.image(s + 'Effect', 'assets/characters/' + s + 'effect.png', 170, 170, 1);
+      game.load.spritesheet(s + 'Idle', 'assets/characters/' + s + 'idle.png', 170, 170, 10);
+      game.load.spritesheet(s + 'Up', 'assets/characters/' + s + '1.png', 170, 170, 4);
+      game.load.spritesheet(s + 'Down', 'assets/characters/' + s + '2.png', 170, 170, 4);
+      game.load.spritesheet(s + 'Die', 'assets/characters/' + s + 'death.png', 170, 170, 7);
+      game.load.spritesheet(s + 'Fly', 'assets/characters/' + s + 'fly.png', 170, 170, 12);
+    }
 
     game.load.image('background', 'assets/bg.png');
-    for (i = 0; i < 7; i++)
-      game.load.image('cloud'+i, 'assets/cloud/'+i+'.png');
+    for (let i = 0; i < 7; i++)
+      game.load.image('cloud' + i, 'assets/cloud/' + i + '.png');
     game.load.image('great', 'assets/great.png');
     game.load.image('excellent', 'assets/excellent.png');
-    for (i = 0; i < 10; i++)
+    for (let i = 0; i < 10; i++)
       game.load.image('num' + i, 'assets/number/' + i + '.png');
     game.load.image('surprize', 'assets/surprize.png');
-    for(i=1; i<=3; i++) {
-      game.load.image('spring'+i, 'assets/spring/'+i+'.png');
-      game.load.image('summer'+i, 'assets/summer/'+i+'.png');
-      game.load.image('fall'+i, 'assets/fall/'+i+'.png');
-      game.load.image('winter'+i, 'assets/winter/'+i+'.png');
+    for (let i = 1; i <= 3; i++) {
+      game.load.image('spring' + i, 'assets/spring/' + i + '.png');
+      game.load.image('summer' + i, 'assets/summer/' + i + '.png');
+      game.load.image('fall' + i, 'assets/fall/' + i + '.png');
+      game.load.image('winter' + i, 'assets/winter/' + i + '.png');
     }
     game.load.image('comboText', 'assets/comboText.png');
-    for (i = 0; i < 10; i++)
+    for (let i = 0; i < 10; i++)
       game.load.image('combonum' + i, 'assets/comboNum/' + i + '.png');
-      game.load.image('bonus+', 'assets/combobonus/+.png');
-      for (i = 0; i < 10; i++)
-        game.load.image('bonus' + i, 'assets/combobonus/' + i + '.png');
+    game.load.image('bonus+', 'assets/combobonus/+.png');
+    for (let i = 0; i < 10; i++)
+      game.load.image('bonus' + i, 'assets/combobonus/' + i + '.png');
 
+    for (let i = 1; i <= 5; i++)
+      game.load.image('star' + i, 'assets/effect/star' + i + '.png')
     game.load.image('ringEffect', 'assets/effect.png');
-    game.load.image('shadow1','assets/shadow1.png');
-    game.load.image('shadow2','assets/shadow2.png');
+    game.load.image('exring', 'assets/effect/floor.png');
+    game.load.image('shadow1', 'assets/shadow1.png');
+    game.load.image('shadow2', 'assets/shadow2.png');
 
     game.load.image('pauseBg', 'assets/pauseBg.png');
     game.load.image('pauseButton', 'assets/pause.png');
@@ -106,16 +118,54 @@ var LOAD = {
     game.load.image('textHelp', 'assets/help/text.png');
     game.load.image('textCredit', 'assets/credit/text.png');
 
-        for (i = 0; i < 10; i++)
-          game.load.image('overnum' + i, 'assets/over/score1/' + i + '.png');
-      for (i = 0; i < 10; i++)
+    for (let i = 0; i < 10; i++)
+      game.load.image('overnum' + i, 'assets/over/score1/' + i + '.png');
+    for (let i = 0; i < 10; i++)
       game.load.image('main' + i, 'assets/main/rankingscore/' + i + '.png');
-      game.load.image('main,', 'assets/main/rankingscore/,.png');
-        game.load.image('mainText', 'assets/main/rankingscore/text.png');
-          game.load.image('mainp', 'assets/main/rankingscore/p.png');
+    game.load.image('main,', 'assets/main/rankingscore/,.png');
+    game.load.image('mainText', 'assets/main/rankingscore/text.png');
+    game.load.image('mainp', 'assets/main/rankingscore/p.png');
+
+    game.load.audio('fall', 'assets/sounds/fail_1.mp3');
+    game.load.audio('jump', 'assets/sounds/jump_2.mp3');
+    game.load.audio('down', 'assets/sounds/jump_3.mp3');
+    game.load.audio('main', 'assets/sounds/main_1.mp3');
+    game.load.audio('click', 'assets/sounds/click.mp3');
+    game.load.audio('game', 'assets/sounds/game.mp3');
+    game.load.audio('excellent', 'assets/sounds/soundEf2.mp3');
+
+    for (let i = 1; i <= 5; i++) {
+      game.load.image('unlock' + i, 'assets/unlock/' + i + '.png');
+    }
 
   },
   create: function() {
+    if (fallSound == null)
+      fallSound = this.game.add.audio('fall');
+    if (jumpSound == null) {
+      jumpSound = this.game.add.audio('jump');
+      jumpSound.volume -= 0.55;
+    }
+    if (clickSound == null)
+      clickSound = this.game.add.audio('click');
+    if (mainSound == null) {
+      mainSound = this.game.add.audio('main');
+      mainSound.volume += 0.5;
+      mainSound.loopFull();
+      mainSound.stop();
+      mainSound.isPlaying = false;
+    }
+    if (gameSound == null) {
+      gameSound = this.game.add.audio('game');
+      gameSound.volume += 0.3;
+      gameSound.loopFull();
+      gameSound.stop();
+    }
+    if (downSound == null)
+      downSound = this.game.add.audio('down');
+    if (excellentSound == null)
+      excellentSound = this.game.add.audio('excellent');
+
     game.state.start('titlest');
   },
   update: function() {}
@@ -133,6 +183,11 @@ function movePattern(p1, p2) {
 var TITLE = {
   preload: function() {},
   create: function() {
+    gameSound.stop();
+    if (mainSound.isPlaying == false) {
+      mainSound.play();
+      mainSound.isPlaying = true;
+    }
     this.bg = game.add.image(0, 0, 'bgMain');
     this.pattern1 = game.add.image(0, 0, 'patternMain');
     this.pattern2 = game.add.image(this.pattern1.width, 0, 'patternMain');
@@ -140,6 +195,9 @@ var TITLE = {
     this.helpButton = game.add.button(32, 164 - 40 - tabSize, 'helpMain', helpOnClickMain, this);
     this.creditButton = game.add.button(122, 164 - 40 - tabSize, 'creditMain', creditOnClickMain, this);
     this.soundButton = game.add.button(width - 110, 164 - 40 - tabSize, 'soundOnMain', soundOnClickMain, this);
+    this.soundOff = game.add.image(width - 110, 164 - 40 - tabSize, 'soundOffMain')
+    if (!fallSound.mute)
+      this.soundOff.kill();
     this.rankingButton = game.add.button(368, 1109 - tabSize, 'rankingStartMain', rankingOnClickMain, this);
     this.board = game.add.image(0, 0 - tabSize, 'boardMain');
     this.tile = game.add.image(53, 571 - tabSize, 'tileMain');
@@ -150,13 +208,13 @@ var TITLE = {
     this.ceta = 0;
     this.moveSpeed = Math.PI * 0.7;
 
-    this.numList=[];
-    let highscore=localStorage['TileJumpHighScore'] || '0';
-    listNum(2342312123,631,821-66);
-    listNum(highscore,631,821);  //66
-    rankNum(95,631,887);
-    rankNum(2,631,887+66);
-
+    this.numList = [];
+    let highscore = localStorage['TileJumpHighScore'] || '0';
+    listNum(2342312123, 631, 821 - 66);
+    listNum(highscore, 631, 821); //66
+    rankNum(95, 631, 887);
+    rankNum(2, 631, 887 + 66);
+    //soundOnClickMain();
   },
   update: function() {
     movePattern(this.pattern1, this.pattern2);
@@ -164,48 +222,70 @@ var TITLE = {
     this.ceta += this.moveSpeed * game.time.physicsElapsed;
   }
 };
-function listNum(num,x,y)  {
-  let nums=num.toString();
+
+function soundOnClickMain() {
+  if (TITLE.soundOff.alive)
+    TITLE.soundOff.kill();
+  else
+    TITLE.soundOff.revive();
+  clickSound.play();
+  fallSound.mute = !fallSound.mute;
+  jumpSound.mute = !jumpSound.mute;
+  clickSound.mute = !clickSound.mute;
+  mainSound.mute = !mainSound.mute;
+  gameSound.mute = !gameSound.mute;
+  excellentSound.mute = !excellentSound.mute;
+}
+
+function listNum(num, x, y) {
+  let nums = num.toString();
   //let x=_x-nums.length*
   TITLE.numList.push([]);
-  let comnum=(nums.length-1)/3;
-  for(let i=0; i<nums.length; i++)  {
-      TITLE.numList[TITLE.numList.length-1].push(
-        TITLE.add.image(x - ((nums.length-i) * 16 + comnum*7), y, 'main' + nums[i]));
-      if((nums.length-i)%3==1 && i!=nums.length-1)  {
-          comnum--;
-          TITLE.numList[TITLE.numList.length-1].push(
-          TITLE.add.image(x - ((nums.length-i) * 16 + (comnum-1)*7-1), y+4, 'main,'));
-      }
+  let comnum = (nums.length - 1) / 3;
+  for (let i = 0; i < nums.length; i++) {
+    TITLE.numList[TITLE.numList.length - 1].push(
+      TITLE.add.image(x - ((nums.length - i) * 16 + comnum * 7), y, 'main' + nums[i]));
+    if ((nums.length - i) % 3 == 1 && i != nums.length - 1) {
+      comnum--;
+      TITLE.numList[TITLE.numList.length - 1].push(
+        TITLE.add.image(x - ((nums.length - i) * 16 + (comnum - 1) * 7 - 1), y + 4, 'main,'));
+    }
   }
 }
-function rankNum(num,x,y) {
+
+function rankNum(num, x, y) {
   TITLE.numList.push([]);
   let nums = num.toString();
-  let _x =x- Math.floor(nums.length * 16)-45-16;
+  let _x = x - Math.floor(nums.length * 16) - 45 - 16;
   for (let i = 0; i < nums.length; i++) {
-      TITLE.numList[TITLE.numList.length-1].push(
-        TITLE.add.image(_x + ((i) * 16)+45, y, 'main' + nums[i]));
+    TITLE.numList[TITLE.numList.length - 1].push(
+      TITLE.add.image(_x + ((i) * 16) + 45, y, 'main' + nums[i]));
 
   }
-  TITLE.numList[TITLE.numList.length-1].push(
+  TITLE.numList[TITLE.numList.length - 1].push(
     TITLE.add.image(_x, y, 'mainText'));
-    TITLE.numList[TITLE.numList.length-1].push(
-      TITLE.add.image(x-16, y-1, 'mainp'));
+  TITLE.numList[TITLE.numList.length - 1].push(
+    TITLE.add.image(x - 16, y - 1, 'mainp'));
 }
+
 function startOnClilckMain() {
+  clickSound.play();
   game.state.start('charselectst');
 }
 
 function startOnClilckSelect() {
+  clickSound.play();
   game.state.start('gamest');
 }
 
 function helpOnClickMain() {
+  clickSound.play();
   game.state.start('helpst');
 }
 
 function creditOnClickMain() {
+  clickSound.play();
+  localStorage['TileJumpHighScore'] = '0';
   game.state.start('creditst');
 }
 var CHARSELECT = {
@@ -216,8 +296,7 @@ var CHARSELECT = {
     this.pattern1 = game.add.image(0, 0, 'patternMain');
     this.pattern2 = game.add.image(this.pattern1.width, 0, 'patternMain');
     this.startButton = game.add.button(217, 1112 - tabSize, 'startButtonSelect', startOnClilckSelect, this);
-    let charlockCond = [0, 500, 2000, 4000, 10000, 20000];
-    let highScore = Number(localStorage['TileJumpHighScore']);
+    let highScore = Number(localStorage['TileJumpHighScore'] || '0');
     for (let i = 0; i < 6; i++) {
       if (charlockCond[i] > highScore) {
         charLock[i] = false;
@@ -233,9 +312,9 @@ var CHARSELECT = {
         let idx = i;
         this.selectButtons.push(game.add.button(13 + 236 * ((i - 1) % 3), 244 + 336 * Math.round((i - 2) / 3) - this.dy, '' + i + 'off', notBut, this));
       }
-        CHARSELECT.selectButtons[i-1].tint=0xBBBBBB;
+      CHARSELECT.selectButtons[i - 1].tint = 0xBBBBBB;
     }
-    CHARSELECT.selectButtons[0].tint=0xFFFFFF;
+    CHARSELECT.selectButtons[0].tint = 0xFFFFFF;
     this.bg = game.add.image(43, 167 - this.dy, 'textSelect');
   },
   update: function() {
@@ -247,15 +326,14 @@ function notBut() {
 
 }
 
-function soundOnClickMain(){
-}
 var selBut = function(id) {
   return function() {
-
-    CHARSELECT.selectButtons[charId].tint=0xBBBBBB;
+    clickSound.play();
+    for (let i = 0; i < 6; i++)
+      CHARSELECT.selectButtons[i].tint = 0xBBBBBB;
     //CHARSELECT.selectButtons[charId].key=''+(charId+1)+'select';
     charId = id;
-    CHARSELECT.selectButtons[id].tint=0xFFFFFF;
+    CHARSELECT.selectButtons[id].tint = 0xFFFFFF;
   }
 
 }
@@ -265,6 +343,7 @@ function getCharId() {
 }
 
 function closeOnClick() {
+  clickSound.play();
   game.state.start('titlest');
 }
 
@@ -375,26 +454,6 @@ var GAME = {
     this.scoreImages = [];
     this.stage = 1;
     createClouds();
-    this.effect = AddImage(this.player.x, this.player.y, this.characterString + 'Effect');
-    this.ringEffect = AddImage(this.player.x, this.player.y + 190, 'ringEffect');
-    this.effect.anchor.setTo(0.5, 0.5);
-    this.ringEffect.anchor.setTo(0.5, 0.5);
-    this.effect.x = this.player.x + this.player.width / 2;
-    this.ringEffect.x = this.player.x + this.player.width / 2;
-    this.effect.y = this.player.y + this.player.height / 2;
-    this.effect.kill();
-    this.ringEffect.kill();
-
-
-    this.effectTextE = AddImage(this.player.x + this.player.width / 2, this.player.y + 10, 'excellent');
-    this.effectTextE.anchor.setTo(0.5, 0.5);
-    this.effectTextE.kill();
-    this.effectTextG = AddImage(this.player.x + this.player.width / 2, this.player.y + 10, 'great');
-    this.effectTextG.anchor.setTo(0.5, 0.5);
-    this.effectTextG.kill();
-    this.effectTextType = 0;
-
-
     this.comboText = AddImage(width / 2, 300, 'comboText');
     this.comboText.anchor.setTo(0.5, 0.5);
     this.comboTextProgress = 0;
@@ -414,7 +473,7 @@ var GAME = {
     this.upAnimSpeed = 60;
     this.flyAnimSpeed = 60;
     this.downAnimSpeed = 11 / 0.3;
-    this.deathAnimSpeed = 20;
+    this.deathAnimSpeed = 40;
 
     this.holdTile = [];
     this.tileMoved = [];
@@ -426,27 +485,39 @@ var GAME = {
     this.comboImages = [];
     this.comboEffectProgress = 0;
 
-    this.shadow=null;
-    this.shadowX=this.playerDX+25;
-    this.shadowY=this.playerDY+100;
-    if(getCharId()%2==1)
-      this.shadow=game.add.image(this.shadowX+62,this.shadowY+35,'shadow1');
-      else
-        this.shadow=game.add.image(this.shadowX+62,this.shadowY+35,'shadow2');
-      this.shadow.anchor.setTo(0.5,0.5);
+    this.shadow = null;
+    this.shadowX = this.playerDX + 25;
+    this.shadowY = this.playerDY + 100;
+
+    this.stars = [];
+    this.starDir = [];
+    this.starProg = [];
+
+    this.charEffects = [];
+    this.ringEffects = [];
+    this.textEffects = [];
+
+    if (getCharId() % 2 == 1)
+      this.shadow = game.add.image(this.shadowX + 62, this.shadowY + 35, 'shadow1');
+    else
+      this.shadow = game.add.image(this.shadowX + 62, this.shadowY + 35, 'shadow2');
+    this.shadow.anchor.setTo(0.5, 0.5);
     for (let i = 0; i < 6; i++)
       createNewTile(i);
     addScore(0);
+    mainSound.stop();
+    mainSound.isPlaying = false;
+    gameSound.play();
   },
   update: function() {
     moveBG();
-    if (this.score >= (this.stage) * 300) {
+    if (this.score >= (this.stage) * 1500) {
       this.stage += 1;
       this.season += 1;
       if (this.season > 4)
         this.season = 1;
-      if(this.patternRatioDefault>1)
-      this.patternRatioDefault-=0.05;
+      if (this.patternRatioDefault > 1)
+        this.patternRatioDefault -= 0.05;
     }
     if (this.jumpState != -3)
       moveNewTile(-1);
@@ -473,9 +544,9 @@ var GAME = {
     } else if (this.jumpState == 1) { //이동 1
       moveOthers(-this.oneTileX * game.time.physicsElapsed * this.jumpSpeed, 0);
       this.eDis += this.oneTileX * game.time.physicsElapsed * this.jumpSpeed;
-      if(this.shadow.scale.x>=0)  {
-        if(1-this.eDis/(this.oneTileX/2)>=0)
-          this.shadow.scale.setTo(1-this.eDis/(this.oneTileX/2));
+      if (this.shadow.scale.x >= 0) {
+        if (1 - this.eDis / (this.oneTileX / 2) >= 0)
+          this.shadow.scale.setTo(1 - this.eDis / (this.oneTileX / 2));
         else
           this.shadow.scale.setTo(0);
       }
@@ -483,7 +554,7 @@ var GAME = {
         moveOthers(this.eDis - this.oneTileX, 0);
         this.jumpState = 2;
         this.eDis = 0;
-        if(getAccuracy()>0.7)
+        if (getAccuracy() > 0.7)
           this.shadow.kill();
       }
     } else if (this.jumpState == -1) {
@@ -495,12 +566,13 @@ var GAME = {
           this.surprize.kill();
         }
       }
-      if (this.eTime >= 0.7) {
+      if (this.eTime >= 0.4) {
         this.eTime = 0;
         this.jumpState = -2;
         this.player.anchor.setTo(0.5, 0.5);
         this.player.x += this.player.width / 2;
         this.player.y += this.player.height / 2;
+        fallSound.play();
       }
     } else if (this.jumpState == -2) {
       if (this.player.x > this.tiles[this.tiles.length - 1].x || (this.player.x > this.tiles[this.tiles.length - 1].x + 20))
@@ -513,10 +585,10 @@ var GAME = {
     } else if (this.jumpState == 2) {
       moveOthers(0, -this.oneTileY * game.time.physicsElapsed * this.jumpSpeed);
       this.eDis += this.oneTileY * game.time.physicsElapsed * this.jumpSpeed;
-      if(this.shadow.scale.x<=1)  {
-        if(this.shadow.alive && (this.eDis-this.oneTileY/2)/(this.oneTileY/2)>=0)  {
-          this.shadow.scale.setTo((this.eDis-this.oneTileY/2)/(this.oneTileY/2));
-          if((this.eDis-this.oneTileY/2)/(this.oneTileY/2)>=1)
+      if (this.shadow.scale.x <= 1) {
+        if (this.shadow.alive && (this.eDis - this.oneTileY / 2) / (this.oneTileY / 2) >= 0) {
+          this.shadow.scale.setTo((this.eDis - this.oneTileY / 2) / (this.oneTileY / 2));
+          if ((this.eDis - this.oneTileY / 2) / (this.oneTileY / 2) >= 1)
             this.shadow.scale.setTo(1);
         }
       }
@@ -531,8 +603,8 @@ var GAME = {
           this.surprize.alpha = 1;
           game.world.bringToTop(this.surprize);
           this.shadow.kill();
+          gameSound.stop();
         } else {
-
           this.scoredBlocks++;
           changePlayerAnim('Down', this.downAnimSpeed, false);
           addCombo(1);
@@ -540,9 +612,11 @@ var GAME = {
           if (this.combo >= 2)
             sc += Math.floor(this.combo / 10 + 1) * 10;
           if (getAccuracy() < 0.3) {
+            excellentSound.play();
             sc += 100;
             this.effectTextType = 1;
           } else {
+            downSound.play();
             sc += 50;
             this.effectTextType = 2;
           }
@@ -584,25 +658,16 @@ var GAME = {
       this.pauseButton = game.add.button(317, 933, 'restartOver', restartGame, this);
       this.bragButton = game.add.button(106, 933, 'bragOver', bragOver, this);
       this.jumpState = -4;
-      let highScore = Number(localStorage['TileJumpHighScore']);
+      this.unlockEffect = [];
+      let highScore = Number(localStorage['TileJumpHighScore'] || '0');
       if (highScore < this.score) {
         this.best = AddImage(149, 337, 'bestOver');
+        unlockCharacters(highScore);
         localStorage['TileJumpHighScore'] = this.score.toString();
       }
       overScore();
-      var options = {
-        direction: 'y',
-        overflow: 100,
-        padding: 10
-      }
-
-      this.listView = new ListView(this.game, this.world, new Phaser.Rectangle(0,0,300,400), options);
-      this.items = [] // [Graphics, Image, Sprite, Group]
-      for(let i=0; i<15; i++) {
-        this.items.push(new Phaser.Rectangle(0,0,300,100))
-      }
-      listView.addMultiple(...items);
-      listView.add(newItem);
+    } else if (this.jumpState == -4) {
+      updateUnlock();
     }
     updateEffects();
     updateComboEffect();
@@ -611,20 +676,44 @@ var GAME = {
   }
 }
 
+function unlockCharacters(highScore) {
+  for (let i = 5; i >= 0; i--) {
+    if (highScore < charlockCond[i] && charlockCond[i] <= GAME.score) {
+      console.log(i);
+      GAME.unlockEffect.push(AddImage(108, 30, 'unlock' + (i)));
+    }
+  }
+}
 
-function listNumOver(num,x,y)  {
-  let nums=num.toString();
+function updateUnlock() {
+  if (GAME.unlockEffect.length == 0)
+    return;
+  GAME.eTime += game.time.physicsElapsed;
+  if (GAME.eTime >= 1) {
+    if (GAME.unlockEffect[GAME.unlockEffect.length - 1].alpha - game.time.physicsElapsed <= 0.1) {
+      GAME.unlockEffect[GAME.unlockEffect.length - 1].destroy();
+      GAME.unlockEffect.pop();
+      GAME.eTime = 0;
+      return;
+    }
+    GAME.unlockEffect[GAME.unlockEffect.length - 1].alpha -= game.time.physicsElapsed;
+    GAME.unlockEffect[GAME.unlockEffect.length - 1].y -= game.time.physicsElapsed * 30;
+  }
+}
+
+function listNumOver(num, x, y) {
+  let nums = num.toString();
   //let x=_x-nums.length*
   TITLE.numList.push([]);
-  let comnum=(nums.length-1)/3;
-  for(let i=0; i<nums.length; i++)  {
-      TITLE.numList[TITLE.numList.length-1].push(
-        TITLE.add.image(x - ((nums.length-i) * 16 + comnum*7), y, 'main' + nums[i]));
-      if((nums.length-i)%3==1 && i!=nums.length-1)  {
-          comnum--;
-          TITLE.numList[TITLE.numList.length-1].push(
-          TITLE.add.image(x - ((nums.length-i) * 16 + (comnum-1)*7-1), y+4, 'main,'));
-      }
+  let comnum = (nums.length - 1) / 3;
+  for (let i = 0; i < nums.length; i++) {
+    TITLE.numList[TITLE.numList.length - 1].push(
+      TITLE.add.image(x - ((nums.length - i) * 16 + comnum * 7), y, 'main' + nums[i]));
+    if ((nums.length - i) % 3 == 1 && i != nums.length - 1) {
+      comnum--;
+      TITLE.numList[TITLE.numList.length - 1].push(
+        TITLE.add.image(x - ((nums.length - i) * 16 + (comnum - 1) * 7 - 1), y + 4, 'main,'));
+    }
   }
 }
 
@@ -699,20 +788,20 @@ function addCombo(n) {
   GAME.comboImages.push(AddImage(x + ((k.length) * 35 + 164 / 2 - 10), y, 'comboText'));
   GAME.comboImages[k.length].anchor.setTo(0.5, 0.5);
   GAME.comboEffectProgress = 0;
-  let len=GAME.comboImages.length;
+  let len = GAME.comboImages.length;
 
-  x = width / 2+20;  //28*36
-  y = 300-50;
-  let bonus=Math.floor(GAME.combo / 10 + 1) * 10;
-  k='';
+  x = width / 2 + 20; //28*36
+  y = 300 - 50;
+  let bonus = Math.floor(GAME.combo / 10 + 1) * 10;
+  k = '';
   k = bonus.toString();
   x -= Math.floor(k.length / 2) * 14 + 28 / 2;
   for (let i = 0; i < k.length; i++) {
-  GAME.comboImages.push(AddImage(x + (i * 28), y, 'bonus' + k[i]));
-  GAME.comboImages[len+i].anchor.setTo(0.5, 0.5);
+    GAME.comboImages.push(AddImage(x + (i * 28), y, 'bonus' + k[i]));
+    GAME.comboImages[len + i].anchor.setTo(0.5, 0.5);
   }
-  GAME.comboImages.push(AddImage(x - ((k.length) * 14 + 28 / 2-10), y, 'bonus+'));
-  GAME.comboImages[GAME.comboImages.length-1].anchor.setTo(0.5, 0.5);
+  GAME.comboImages.push(AddImage(x - ((k.length) * 14 + 28 / 2 - 10), y, 'bonus+'));
+  GAME.comboImages[GAME.comboImages.length - 1].anchor.setTo(0.5, 0.5);
   GAME.comboEffectProgress = 0;
 }
 
@@ -787,7 +876,7 @@ function createNewTile(i) {
 }
 
 function moveNewTile(n) {
-  for (i = 0; i < GAME.newTile.length; i++) {
+  for (let i = 0; i < GAME.newTile.length; i++) {
     if (i != n) {
       if (!GAME.holdTile[i]) {
         GAME.newTile[i].x += -GAME.oneTileX * game.time.physicsElapsed * GAME.tileSpeed[i] * GAME.tileDir[i];
@@ -799,11 +888,11 @@ function moveNewTile(n) {
 }
 
 function moveOthers(x, y) {
-  for (i = 0; i < GAME.tiles.length; i++) {
+  for (let i = 0; i < GAME.tiles.length; i++) {
     GAME.tiles[i].x += x;
     GAME.tiles[i].y += y;
   }
-  for (i = 0; i < GAME.newTile.length; i++) {
+  for (let i = 0; i < GAME.newTile.length; i++) {
     GAME.newTile[i].x += x;
     GAME.newTile[i].y += y;
   }
@@ -870,6 +959,7 @@ function itemTouched(pointer) {
 }
 
 function Jump() {
+  jumpSound.play();
   changePlayerAnim('Up', GAME.upAnimSpeed, false);
   GAME.jumpState = 0.5;
   pushNewTile(GAME.newTile[0].x, GAME.newTile[0].y);
@@ -889,7 +979,7 @@ function getAccuracy() {
 }
 
 function pushTile(x, y, key) {
-  for (i = 0; i < GAME.tiles.length; i++) {
+  for (let i = 0; i < GAME.tiles.length; i++) {
     GAME.tiles[i].x -= GAME.oneTileX;
     GAME.tiles[i].y -= GAME.oneTileY;
   }
@@ -930,27 +1020,41 @@ function abs(x) {
 }
 
 function setRenderOrder() {
-  for (i = 0; i < GAME.clouds.length; i++) {
-    for (j = 0; j < GAME.clouds[i].length; j++) {
+  for (let i = 0; i < GAME.clouds.length; i++) {
+    for (let j = 0; j < GAME.clouds[i].length; j++) {
       game.world.bringToTop(GAME.clouds[i][j]);
     }
   }
-  for (i = 0; i < GAME.tiles.length; i++)
+  for (let i = 0; i < GAME.tiles.length; i++)
     game.world.bringToTop(GAME.tiles[i]);
 
-  for (i = 0; i < GAME.newTile.length; i++)
+  for (let i = 0; i < GAME.newTile.length; i++)
     game.world.bringToTop(GAME.newTile[i]);
   game.world.bringToTop(GAME.shadow);
-  for (i = 0; i < GAME.scoreImages.length; i++)
+  for (let i = 0; i < GAME.scoreImages.length; i++)
     game.world.bringToTop(GAME.scoreImages[i]);
-  game.world.bringToTop(GAME.effectTextE);
-  game.world.bringToTop(GAME.effectTextG);
+  for (let i = 0; i < GAME.textEffects.length; i++) {
+    game.world.bringToTop(GAME.textEffects[i]);
+  }
 
-  game.world.bringToTop(GAME.ringEffect);
+  for (let i = 0; i < GAME.ringEffects.length; i++) {
+    game.world.bringToTop(GAME.ringEffects[i]);
+  }
+    for (let i = 0; i < GAME.stars.length; i++) {
+      if(GAME.starDir[i]>=Math.PI*1.2 && GAME.starDir[i]<=Math.PI*1.8)
+        game.world.bringToTop(GAME.stars[i]);
+    }
   game.world.bringToTop(GAME.player);
 
-  game.world.bringToTop(GAME.effect);
+  for (let i = 0; i < GAME.charEffects.length; i++) {
+    game.world.bringToTop(GAME.charEffects[i]);
+  }
   game.world.bringToTop(GAME.surprize);
+
+  for (let i = 0; i < GAME.stars.length; i++) {
+    if(!(GAME.starDir[i]>=Math.PI*1.2 && GAME.starDir[i]<=Math.PI*1.8))
+      game.world.bringToTop(GAME.stars[i]);
+  }
 
 }
 
@@ -962,14 +1066,14 @@ function createClouds() {
   GAME.clouds.push(AddImage(-150, 1050, 'cloud4'));
   GAME.clouds.push(AddImage(360, 270, 'cloud5'));
   GAME.clouds.push(AddImage(430, 90, 'cloud6'));
-  for (i = 0; i < GAME.clouds.length; i++) {
+  for (let i = 0; i < GAME.clouds.length; i++) {
     GAME.clouds[i].alpha = Math.random() * 0.7 + 0.3;
   }
 }
 
 function moveBG() {
   let l = GAME.clouds.length;
-  for (i = 0; i < GAME.clouds.length; i++) {
+  for (let i = 0; i < GAME.clouds.length; i++) {
     GAME.clouds[i].x -= game.time.physicsElapsed * GAME.oneTileX * GAME.cloudSpeed;
     GAME.clouds[i].y -= game.time.physicsElapsed * GAME.oneTileY * GAME.cloudSpeed;
     if (GAME.clouds[i].x + GAME.clouds[i].width < 0) {
@@ -988,77 +1092,109 @@ function moveBG() {
 }
 
 function restartGame() {
+  clickSound.play();
   game.state.start('titlest');
 }
 
 function activateEffects() {
-
-  GAME.ringEffect.revive();
-  game.world.bringToTop(GAME.ringEffect);
-  GAME.effect.revive();
-  game.world.bringToTop(GAME.effect);
-  GAME.effect.alpha = 1;
-  GAME.ringEffect.alpha = 1;
-  GAME.effectScale = 1;
   if (GAME.effectTextType == 1) {
-    GAME.effectTextE.revive();
-    game.world.bringToTop(GAME.effectTextE);
-    GAME.effectTextE.alpha = 1;
-    GAME.effectTextE.y = GAME.player.y + 10;
-      GAME.effect.tint = 0xBBFA66;
-      GAME.ringEffect.tint = 0xBBFA66;
+    let ce = AddImage(GAME.player.x, GAME.player.y, GAME.characterString + 'Effect');
+    ce.anchor.setTo(0.5);
+    ce.tint = 0xBBFA66;
+    ce.x+=GAME.player.width/2;
+    ce.y+=GAME.player.height/2;
+    GAME.charEffects.push(ce);
+    let re = AddImage(GAME.player.x, GAME.player.y + 190, 'exring');
+    re.anchor.setTo(0.5);
+    re.scale.setTo(0.5);
+    re.x+=GAME.player.width/2;
+    GAME.ringEffects.push(re);
+    let te = AddImage(GAME.player.x + GAME.player.width / 2, GAME.player.y + 10, 'excellent');
+    te.anchor.setTo(0.5);
+    GAME.textEffects.push(te);
+    for (let i = 0; i < 7; i++) {
+      let nStar = AddImage(GAME.playerDX + 95, GAME.playerDY + 120, 'star' + (Math.floor(Math.random() * 5) + 1))
+      nStar.anchor.setTo(0.5);
+      GAME.stars.push(nStar);
+      GAME.starDir.push(Math.random() * 2 * Math.PI);
+      GAME.starProg.push(0);
+    }
   } else if (GAME.effectTextType == 2) {
-    GAME.effectTextG.revive();
-    game.world.bringToTop(GAME.effectTextG);
-    GAME.effectTextG.y = GAME.player.y + 10;
-    GAME.effectTextG.alpha = 1;
-      GAME.effect.tint = 0xF9B468;
-      GAME.ringEffect.tint = 0xF9B468;
-  }
-  if (GAME.combo <= 1) {
-
-      GAME.effect.tint = 0xFFFFFF;
-      GAME.ringEffect.tint = 0xFFFFFF;
+    let ce = AddImage(GAME.player.x, GAME.player.y, GAME.characterString + 'Effect');
+    ce.anchor.setTo(0.5);
+    ce.tint = 0xF9B468;
+    ce.x+=GAME.player.width/2;
+    ce.y+=GAME.player.height/2;
+    GAME.charEffects.push(ce);
+    let re = AddImage(GAME.player.x, GAME.player.y + 190, 'ringEffect');
+    re.tint = 0xF9B468;
+    re.x+=GAME.player.width/2;
+    re.anchor.setTo(0.5);
+    re.scale.setTo(0.8);
+    GAME.ringEffects.push(re);
+    let te = AddImage(GAME.player.x + GAME.player.width / 2, GAME.player.y + 10, 'great');
+    te.anchor.setTo(0.5);
+    GAME.textEffects.push(te);
   }
 }
 
 function updateEffects(type) {
 
-  if (GAME.effectTextE.alive == true) {
-    GAME.effectTextE.alpha -= game.time.physicsElapsed * 3;
-    GAME.effectTextE.y -= game.time.physicsElapsed * 70;
-    if (GAME.effectTextE.alpha - game.time.physicsElapsed * 2 <= 0)
-      GAME.effectTextE.kill();
-  }
-  if (GAME.effectTextG.alive == true) {
-    GAME.effectTextG.alpha -= game.time.physicsElapsed * 3;
-    GAME.effectTextG.y -= game.time.physicsElapsed * 70;
-    if (GAME.effectTextG.alpha - game.time.physicsElapsed * 2 <= 0)
-      GAME.effectTextG.kill();
-  }
-  if (GAME.effect.alive == true) {
-    GAME.effect.alpha -= game.time.physicsElapsed * 4;
-    GAME.effectScale += game.time.physicsElapsed * 5;
-    GAME.effect.scale.setTo(GAME.effectScale, GAME.effectScale);
-    if (GAME.effect.alpha - game.time.physicsElapsed * 4 <= 0) {
-      GAME.effect.kill();
+  for (let i = 0; i < GAME.textEffects.length; i++) {
+    GAME.textEffects[i].alpha -= game.time.physicsElapsed * 3;
+    GAME.textEffects[i].y -= game.time.physicsElapsed * 70;
+    if (GAME.textEffects[i].alpha - game.time.physicsElapsed * 2 <= 0) {
+      GAME.textEffects[i].destroy();
+      GAME.textEffects.splice(i, 1);
     }
   }
-  if (GAME.ringEffect.alive == true) {
-    GAME.ringEffect.alpha -= game.time.physicsElapsed * 3;
-    GAME.ringEffect.scale.setTo(GAME.effectScale, GAME.effectScale);
-    if (GAME.ringEffect.alpha - game.time.physicsElapsed * 3 <= 0) {
-      GAME.ringEffect.kill();
-      GAME.effectScale = 0;
+    for (let i = 0; i < GAME.charEffects.length; i++) {
+      GAME.charEffects[i].alpha -= game.time.physicsElapsed * 4;
+      GAME.charEffects[i].scale.setTo(GAME.charEffects[i].scale.x + game.time.physicsElapsed * 5);
+      if (GAME.charEffects[i].alpha - game.time.physicsElapsed * 4 <= 0) {
+        GAME.charEffects[i].destroy();
+        GAME.charEffects.splice(i, 1);
+      }
+    }
+    for (let i = 0; i < GAME.ringEffects.length; i++) {
+      GAME.ringEffects[i].alpha -= game.time.physicsElapsed * 2;
+      GAME.ringEffects[i].scale.setTo(GAME.ringEffects[i].scale.x + game.time.physicsElapsed * 2);
+      if (GAME.ringEffects[i].alpha - game.time.physicsElapsed * 2 <= 0) {
+        GAME.ringEffects[i].destroy();
+        GAME.ringEffects.splice(i, 1);
+      }
+    }
+    for (let i = 0; i < GAME.stars.length; i++) {
+      GAME.starProg[i] += game.time.physicsElapsed;
+      if (GAME.starProg[i] <= 0.2) {
+        GAME.stars[i].x += game.time.physicsElapsed * 500 * Math.cos(GAME.starDir[i]);
+        GAME.stars[i].y += game.time.physicsElapsed * 250 * Math.sin(GAME.starDir[i]);
+        if (GAME.starDir[i] >= Math.PI * 0.5 && GAME.starDir[i] <= Math.PI * 1.5)
+          GAME.stars[i].rotation += game.time.physicsElapsed * 360;
+        else
+          GAME.stars[i].rotation -= game.time.physicsElapsed * 360;
+      } else if (GAME.starProg[i] <= 0.7) {
+        GAME.stars[i].x += game.time.physicsElapsed * 80 * Math.cos(GAME.starDir[i]);
+        GAME.stars[i].y += game.time.physicsElapsed * 60 * Math.sin(GAME.starDir[i]);
+        if (GAME.starDir[i] >= Math.PI * 0.5 && GAME.starDir[i] <= Math.PI * 1.5)
+          GAME.stars[i].rotation += game.time.physicsElapsed * 3;
+        else
+          GAME.stars[i].rotation -= game.time.physicsElapsed * 3;
+        GAME.stars[i].alpha -= game.time.physicsElapsed * 2;
+      } else {
+        GAME.stars[i].destroy();
+        GAME.stars.splice(i, 1);
+        GAME.starDir.splice(i, 1);
+        GAME.starProg.splice(i, 1);
+      }
     }
   }
-}
 
-game.state.add('loadst', LOAD)
-game.state.add('titlest', TITLE);
-game.state.add('creditst', CREDIT);
-game.state.add('helpst', HELP);
-game.state.add('charselectst', CHARSELECT);
-game.state.add('gamest', GAME);
+  game.state.add('loadst', LOAD)
+  game.state.add('titlest', TITLE);
+  game.state.add('creditst', CREDIT);
+  game.state.add('helpst', HELP);
+  game.state.add('charselectst', CHARSELECT);
+  game.state.add('gamest', GAME);
 
-game.state.start('loadst');
+  game.state.start('loadst');
