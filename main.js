@@ -285,7 +285,6 @@ function helpOnClickMain() {
 
 function creditOnClickMain() {
   clickSound.play();
-  localStorage['TileJumpHighScore'] = '0';
   game.state.start('creditst');
 }
 var CHARSELECT = {
