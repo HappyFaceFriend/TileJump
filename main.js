@@ -44,6 +44,7 @@ var LOADLOAD  ={
 }
 var LOAD = {
   preload: function() {
+    document.getElementById("bd").style.backgroundColor = "#000C31";
     this.add.image(0,0,'loadbg');
     this.loadAnim=this.add.image(279,453,'loadAnim');
     this.loadAnim.animations.add('animload');
@@ -220,7 +221,7 @@ function movePattern(p1, p2) {
 }
 var TITLE = {
   preload: function() {
-
+    document.getElementById("bd").style.backgroundColor = "#5AE5FE";
   },
   create: function() {
     gameSound.stop();
@@ -420,7 +421,8 @@ var CREDIT = {
 
 var GAME = {
   preload: function() {
-      },
+    document.getElementById("bd").style.backgroundColor = "#6FCAFF";
+  },
   create: function() {
     this.charList = ['owl', 'fox', 'cat', 'chip', 'ck', 'dog'];
     //this.bg=AddImage(0,0,'background');
