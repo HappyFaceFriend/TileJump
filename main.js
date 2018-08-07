@@ -757,6 +757,7 @@ var GAME = {
   }
 }
 function startFever()  {
+  document.getElementById("bd").style.backgroundColor = "#041b47";
   gameSound.stop();
   feverSound.play();
 
@@ -818,6 +819,7 @@ function startFever()  {
   }
 }
 function fadeFever()  {
+  document.getElementById("bd").style.backgroundColor = "#6FCAFF";
   GAME.feverFade-=game.time.physicsElapsed;
   GAME.feverBg.alpha=GAME.feverFade;
   GAME.feverBg2.alpha=GAME.feverFade;
