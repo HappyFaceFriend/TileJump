@@ -44,8 +44,6 @@ var LOADLOAD  ={
 }
 var LOAD = {
   preload: function() {
-    document.getElementById("bd").style.backgroundColor = "#000C31";
-
     this.add.image(0,0,'loadbg');
     this.loadAnim=this.add.image(279,453,'loadAnim');
     this.loadAnim.animations.add('animload');
@@ -135,7 +133,7 @@ var LOAD = {
     game.load.image('lowerOver', 'assets/over/lower.png');
 
     game.load.image('closeButton', 'assets/help/close.png');
-    game.load.image('textHelp', 'assets/help/text.png');
+    game.load.image('textHelp', 'assets/help/help2.png');
     game.load.image('textCredit', 'assets/credit/text.png');
 
     for (let i = 0; i < 10; i++)
@@ -223,7 +221,6 @@ function movePattern(p1, p2) {
 var TITLE = {
   preload: function() {
 
-      document.getElementById("bd").style.backgroundColor = "#5AE5FE";
   },
   create: function() {
     gameSound.stop();
@@ -399,8 +396,8 @@ var HELP = {
     this.pattern1 = game.add.image(0, 0, 'patternMain');
     this.pattern2 = game.add.image(this.pattern1.width, 0, 'patternMain');
     this.closeButton = game.add.button(32, 164 - 40 - tabSize, 'closeButton', closeOnClick, this);
-    this.text = game.add.image(50, 146 - tabSize, 'textHelp');
-    this.text.scale.setTo(0.85, 0.85);
+    this.text = game.add.image(89, 146 - tabSize, 'textHelp');
+    //this.text.scale.setTo(0.85, 0.85);
   },
   update: function() {
     movePattern(this.pattern1, this.pattern2);
@@ -423,7 +420,7 @@ var CREDIT = {
 
 var GAME = {
   preload: function() {
-        document.getElementById("bd").style.backgroundColor = "#6FCAFF";},
+      },
   create: function() {
     this.charList = ['owl', 'fox', 'cat', 'chip', 'ck', 'dog'];
     //this.bg=AddImage(0,0,'background');
