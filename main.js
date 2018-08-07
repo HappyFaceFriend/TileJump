@@ -24,14 +24,32 @@ var mainSound;
 var downSound;
 var gameSound;
 var excellentSound;
+var feverSound;
+var LOADLOAD  ={
+
+    preload: function() {
+      game.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL;
+      game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+      game.scale.pageAlignHorizontally = true;
+      game.scale.pageAlignVeritcally = true;
+      game.scale.refresh();
+      game.load.image('loadbg','assets/loadingbg.png');
+      game.load.spritesheet('loadAnim', 'assets/characters/ckfly.png', 170, 170, 12);
+    },
+    create: function()  {
+        game.state.start('loadst');
+
+    },
+    update: function(){}
+}
 var LOAD = {
   preload: function() {
-    game.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL;
-    game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-    game.scale.pageAlignHorizontally = true;
-    game.scale.pageAlignVeritcally = true;
-    game.scale.refresh();
+    document.getElementById("bd").style.backgroundColor = "#000C31";
 
+    this.add.image(0,0,'loadbg');
+    this.loadAnim=this.add.image(279,453,'loadAnim');
+    this.loadAnim.animations.add('animload');
+    this.loadAnim.animations.play('animload', 30, true);
     this.charList = ['owl', 'fox', 'cat', 'chip', 'ck', 'dog'];
 
     for (let i = 0; i < this.charList.length; i++) {
@@ -52,6 +70,9 @@ var LOAD = {
     for (let i = 0; i < 10; i++)
       game.load.image('num' + i, 'assets/number/' + i + '.png');
     game.load.image('surprize', 'assets/surprize.png');
+    for (let i = 1; i <= 3; i++) {
+      game.load.image('fevertile' + i, 'assets/fever/tile/' + i + '.png');
+    }
     for (let i = 1; i <= 3; i++) {
       game.load.image('spring' + i, 'assets/spring/' + i + '.png');
       game.load.image('summer' + i, 'assets/summer/' + i + '.png');
@@ -83,12 +104,11 @@ var LOAD = {
     game.load.image('helpMain', 'assets/main/help.png');
     game.load.image('logoMain', 'assets/main/logo.png');
     game.load.image('logobgMain', 'assets/main/logobg.png');
-    game.load.image('menuMain', 'assets/main/menu.png');
     game.load.image('patternMain', 'assets/main/pattern.png');
     game.load.image('soundOffMain', 'assets/main/soundoff.png');
     game.load.image('soundOnMain', 'assets/main/soundon.png');
-    game.load.image('tileMain', 'assets/main/tile.png');
     game.load.image('rankingStartMain', 'assets/main/rankingstart.png');
+    game.load.image('tileMain','assets/main/tile.png');
 
     game.load.image('startButtonSelect', 'assets/select/gamestart.png')
 
@@ -133,10 +153,24 @@ var LOAD = {
     game.load.audio('click', 'assets/sounds/click.mp3');
     game.load.audio('game', 'assets/sounds/game.mp3');
     game.load.audio('excellent', 'assets/sounds/soundEf2.mp3');
+    game.load.audio('fever', 'assets/sounds/main_5.mp3');
 
     for (let i = 1; i <= 5; i++) {
       game.load.image('unlock' + i, 'assets/unlock/' + i + '.png');
     }
+    game.load.image('feverbg1','assets/fever/bg/bg1.png');
+    game.load.image('feverbg2','assets/fever/bg/bg2.png');
+    game.load.image('feverbg3','assets/fever/bg/bg3.png');
+    game.load.image('feverbg4','assets/fever/bg/bg4.png');
+    game.load.image('feverstar1','assets/fever/bg/star1.png');
+    game.load.image('feverstar2','assets/fever/bg/star2.png');
+    game.load.image('feverstar3','assets/fever/bg/star3.png');
+    game.load.image('feverstar4','assets/fever/bg/star4.png');
+    game.load.image('feverbar','assets/fever/gaugeui/bar.png');
+    game.load.image('feverbareffect','assets/fever/gaugeui/effect.png');
+    game.load.image('fevergauge','assets/fever/gaugeui/gauge.png');
+    game.load.image('fevertext','assets/fever/text.png');
+    game.load.image('fevercentereffect','assets/fever/centereffect.png');
 
   },
   create: function() {
@@ -163,8 +197,14 @@ var LOAD = {
     }
     if (downSound == null)
       downSound = this.game.add.audio('down');
-    if (excellentSound == null)
+      if (feverSound == null) {
+        feverSound = this.game.add.audio('fever');
+        feverSound.volume+=0.2;
+      }
+    if (excellentSound == null) {
       excellentSound = this.game.add.audio('excellent');
+      excellentSound.volume-=0.1;
+    }
 
     game.state.start('titlest');
   },
@@ -181,7 +221,10 @@ function movePattern(p1, p2) {
     p2.x -= p1.width * 2;
 }
 var TITLE = {
-  preload: function() {},
+  preload: function() {
+
+      document.getElementById("bd").style.backgroundColor = "#5AE5FE";
+  },
   create: function() {
     gameSound.stop();
     if (mainSound.isPlaying == false) {
@@ -214,7 +257,6 @@ var TITLE = {
     listNum(highscore, 631, 821); //66
     rankNum(95, 631, 887);
     rankNum(2, 631, 887 + 66);
-    //soundOnClickMain();
   },
   update: function() {
     movePattern(this.pattern1, this.pattern2);
@@ -235,6 +277,8 @@ function soundOnClickMain() {
   mainSound.mute = !mainSound.mute;
   gameSound.mute = !gameSound.mute;
   excellentSound.mute = !excellentSound.mute;
+  downSound.mute=!downSound.mute;
+  feverSound.mute =!feverSound.mute;
 }
 
 function listNum(num, x, y) {
@@ -285,6 +329,7 @@ function helpOnClickMain() {
 
 function creditOnClickMain() {
   clickSound.play();
+  //localStorage['TileJumpHighScore'] = '0';
   game.state.start('creditst');
 }
 var CHARSELECT = {
@@ -313,7 +358,7 @@ var CHARSELECT = {
       }
       CHARSELECT.selectButtons[i - 1].tint = 0xBBBBBB;
     }
-    CHARSELECT.selectButtons[0].tint = 0xFFFFFF;
+    CHARSELECT.selectButtons[charId].tint = 0xFFFFFF;
     this.bg = game.add.image(43, 167 - this.dy, 'textSelect');
   },
   update: function() {
@@ -377,7 +422,8 @@ var CREDIT = {
 };
 
 var GAME = {
-  preload: function() {},
+  preload: function() {
+        document.getElementById("bd").style.backgroundColor = "#6FCAFF";},
   create: function() {
     this.charList = ['owl', 'fox', 'cat', 'chip', 'ck', 'dog'];
     //this.bg=AddImage(0,0,'background');
@@ -468,7 +514,7 @@ var GAME = {
 
     this.touchBuffer = false;
 
-    this.idleAnimSpeed = 10;
+    this.idleAnimSpeed = 15;
     this.upAnimSpeed = 60;
     this.flyAnimSpeed = 60;
     this.downAnimSpeed = 11 / 0.3;
@@ -496,6 +542,20 @@ var GAME = {
     this.ringEffects = [];
     this.textEffects = [];
 
+    this.feverState=0;
+    this.oldNewTiles=[];
+    this.nextFeverTile=1;
+
+    this.feverAddSpeed=1;
+
+    this.feverBars=[];
+    this.feverGauges=[];
+    this.gaugecombo=0;
+    for(let i=0; i<5; i++)  {
+      this.feverBars.push(AddImage(30+138*i,1040,'feverbar'));
+    }
+
+
     if (getCharId() % 2 == 1)
       this.shadow = game.add.image(this.shadowX + 62, this.shadowY + 35, 'shadow1');
     else
@@ -507,21 +567,21 @@ var GAME = {
     mainSound.stop();
     mainSound.isPlaying = false;
     gameSound.play();
+    this.purescore=0;
   },
   update: function() {
     moveBG();
-    if (this.score >= (this.stage) * 1500) {
+    if (this.purescore >= (this.stage) * 1500) {
       this.stage += 1;
       this.season += 1;
       if (this.season > 4)
         this.season = 1;
-      if (this.patternRatioDefault > 1)
-        this.patternRatioDefault -= 0.05;
+      if (this.patternRatioDefault > 0.75)
+        this.patternRatioDefault -= 0.075;
     }
-    if (this.jumpState != -3)
+    if (this.jumpState > -3 && this.feverState==0)
       moveNewTile(-1);
-    this.eTimeTest += game.time.physicsElapsed;
-    if (this.jumpState == 0) {
+    if (this.jumpState == 0 && this.feverState==0) {
       for (let i = 0; i < this.newTile.length; i++) {
         if (this.tileDir[i] == 1 && this.newTile[i].x < -144 ||
           this.tileDir[i] == -1 && this.newTile[i].x > 720) {
@@ -533,16 +593,17 @@ var GAME = {
         releasePattern1();
       }
     }
+
     if (this.jumpState == 0.5) {
-      this.eTime += game.time.physicsElapsed;
+      this.eTime += game.time.physicsElapsed* this.feverAddSpeed;
       if (this.eTime >= 4 / this.upAnimSpeed) {
         this.eTime = 0;
         this.jumpState = 1;
-        changePlayerAnim('Fly', this.flyAnimSpeed, false);
+        changePlayerAnim('Fly', this.flyAnimSpeed* this.feverAddSpeed, false);
       }
     } else if (this.jumpState == 1) { //이동 1
-      moveOthers(-this.oneTileX * game.time.physicsElapsed * this.jumpSpeed, 0);
-      this.eDis += this.oneTileX * game.time.physicsElapsed * this.jumpSpeed;
+      moveOthers(-this.oneTileX * game.time.physicsElapsed * this.jumpSpeed* this.feverAddSpeed, 0);
+      this.eDis += this.oneTileX * game.time.physicsElapsed * this.jumpSpeed* this.feverAddSpeed;
       if (this.shadow.scale.x >= 0) {
         if (1 - this.eDis / (this.oneTileX / 2) >= 0)
           this.shadow.scale.setTo(1 - this.eDis / (this.oneTileX / 2));
@@ -557,9 +618,9 @@ var GAME = {
           this.shadow.kill();
       }
     } else if (this.jumpState == -1) {
-      this.eTime += game.time.physicsElapsed;
+      this.eTime += game.time.physicsElapsed* this.feverAddSpeed;
       if (this.surprize.alpha > 0) {
-        this.surprize.alpha -= game.time.physicsElapsed * 3;
+        this.surprize.alpha -= game.time.physicsElapsed * 3* this.feverAddSpeed;
         if (this.surprize.alpha < 0) {
           this.surprize.alpha = 0;
           this.surprize.kill();
@@ -582,8 +643,8 @@ var GAME = {
         this.jumpState = -3;
       }
     } else if (this.jumpState == 2) {
-      moveOthers(0, -this.oneTileY * game.time.physicsElapsed * this.jumpSpeed);
-      this.eDis += this.oneTileY * game.time.physicsElapsed * this.jumpSpeed;
+      moveOthers(0, -this.oneTileY * game.time.physicsElapsed * this.jumpSpeed* this.feverAddSpeed);
+      this.eDis += this.oneTileY * game.time.physicsElapsed * this.jumpSpeed* this.feverAddSpeed;
       if (this.shadow.scale.x <= 1) {
         if (this.shadow.alive && (this.eDis - this.oneTileY / 2) / (this.oneTileY / 2) >= 0) {
           this.shadow.scale.setTo((this.eDis - this.oneTileY / 2) / (this.oneTileY / 2));
@@ -607,6 +668,7 @@ var GAME = {
           this.scoredBlocks++;
           changePlayerAnim('Down', this.downAnimSpeed, false);
           addCombo(1);
+          this.gaugecombo++;
           let sc = 0;
           if (this.combo >= 2)
             sc += Math.floor(this.combo / 10 + 1) * 10;
@@ -620,14 +682,32 @@ var GAME = {
             this.effectTextType = 2;
           }
           addScore(sc);
+          if(this.feverState==0)
+            this.purescore+=sc;
           activateEffects();
           this.jumpState = 3;
+          if(this.gaugecombo>=5)  {
+            this.gaugecombo=0;
+            let g=AddImage(82+this.feverGauges.length*138,1090,'fevergauge');
+            g.anchor.setTo(0.5);
+            g.scale.setTo(0.3);
+            this.feverGauges.push(g);
+
+          }
         }
       }
     } else if (this.jumpState == 3) {
       this.eTime += game.time.physicsElapsed;
       this.moveX = this.tiles[this.tiles.length - 1].x - this.leadTileX;
       this.moveY = this.tiles[this.tiles.length - 1].y - this.leadTileY;
+
+      if(this.feverState==0 && this.feverGauges.length>=5)  {
+        moveOthers(-this.moveX, -this.moveY);
+        createNewTile(this.newTile.length);
+        this.jumpState = 0;
+        startFever();
+        return;
+      }
       if (this.touchBuffer) {
         moveOthers(-this.moveX, -this.moveY);
         createNewTile(this.newTile.length);
@@ -670,11 +750,216 @@ var GAME = {
     }
     updateEffects();
     updateComboEffect();
+    if(this.feverState==1)
+      updateFever();
     if (this.jumpState >= 0)
       setRenderOrder();
   }
 }
+function startFever()  {
+  gameSound.stop();
+  feverSound.play();
 
+  GAME.feverState=1;
+  GAME.feverBg=AddImage(0,0,'feverbg1');
+  GAME.feverBg2=AddImage(0,0,'feverbg2');
+  GAME.feverBg3=AddImage(0,0,'feverbg3');
+  GAME.feverBg4=AddImage(0,0,'feverbg4');
+  GAME.centerEffect=AddImage(128,428,'fevercentereffect');
+  GAME.feverText=AddImage(152,119,'fevertext');
+
+  GAME.feverFade=1;
+
+  GAME.feverBg.alpha=0;
+  GAME.feverBg2.alpha=0;
+  GAME.feverBg3.alpha=0;
+  GAME.feverBg4.alpha=0;
+  GAME.centerEffect.alpha=0;
+  GAME.feverbgToggle=0;
+  GAME.feverToggleA=1;
+  GAME.newTileAnswerX-=45/2;
+  GAME.newTileAnswerY-=47/2;
+  GAME.leadTileX-=45/2;
+  GAME.leadTileY-=47/2;
+  GAME.warncnt=0;
+  GAME.feverText.anchor.setTo(0.5);
+  GAME.feverText.x+=417/2;
+  GAME.feverText.y+=60;
+  GAME.feverText.scale.setTo(0.8);
+  GAME.fevetTextProg=0;
+  GAME.bgStars=[];
+  GAME.feverFadeState=0;
+  for(let i=GAME.newTile.length-1; i>=0; i--)  {
+    GAME.newTile[i].kill();
+    GAME.oldNewTiles.push(GAME.newTile.pop());
+  }
+  for(let i=0; i<8; i++) {
+    let t=AddImage(GAME.newTileAnswerX+i*GAME.oneTileX,GAME.newTileAnswerY+i*GAME.oneTileY,'fevertile'+GAME.nextFeverTile)
+     t.smoothed = true;
+    GAME.newTile.push(t);
+    UpdateNextFeverTile();
+  }
+  for(let i=0; i<width/150; i++)  {
+    for(let j=0; j<height/150; j++) {
+      let s=AddImage(i*150+20+Math.random()*110,j*150+20+Math.random()*110, 'feverstar'+Math.floor(Math.random()*4+1));
+      s.alpha=0.3+Math.random*0.3;
+      s.scale.setTo(Math.random()*0.5 + 0.5);
+
+      GAME.bgStars.push(s);
+    }
+  }
+  GAME.feverAddSpeed=2;
+  GAME.feverETime=0;
+  GAME.gaugeEffects=[];
+  for(let i=0; i<5; i++)  {
+    let g=AddImage(82+i*138,1090,'feverbareffect');
+    g.anchor.setTo(0.5);
+    GAME.gaugeEffects.push(g);
+  }
+}
+function fadeFever()  {
+  GAME.feverFade-=game.time.physicsElapsed;
+  GAME.feverBg.alpha=GAME.feverFade;
+  GAME.feverBg2.alpha=GAME.feverFade;
+    GAME.feverBg4.alpha=GAME.feverFade;
+    GAME.feverBg3.alpha=GAME.feverFade;
+    GAME.centerEffect.alpha=GAME.feverFade;
+    GAME.feverText.alpha=GAME.feverFade;
+    for(let i=0; i<GAME.bgStars.length;i++) {
+      GAME.bgStars[i].alpha=GAME.feverFade;
+    }
+      for(let i=0; i<5; i++)  {
+        GAME.gaugeEffects[i].alpha=GAME.feverFade;
+      }
+    for(let i=0; i<GAME.feverGauges.length; i++)  {
+      GAME.feverGauges[i].scale.setTo(GAME.feverFade);
+    }
+    for(let i=0; i<GAME.oldNewTiles.length; i++)  {
+      if(!GAME.oldNewTiles[i].alive)
+        GAME.oldNewTiles[i].revive();
+      GAME.oldNewTiles[i].alpha=1-GAME.feverFade;
+    }
+  if(GAME.feverFade-game.time.physicsElapsed<=0) {
+
+    if(GAME.feverETime>=6 && (GAME.jumpState==0 || GAME.jumpState==3)) {
+      endFever();
+    }
+  }
+}
+function endFever() {
+GAME.feverAddSpeed=1;
+GAME.newTileAnswerX+=45/2;
+GAME.newTileAnswerY+=47/2;
+GAME.leadTileX+=45/2;
+GAME.leadTileY+=47/2;
+  GAME.moveX=0;
+  GAME.moveY=0;
+  GAME.jumpState=0;
+  GAME.feverState=0;
+  GAME.oldFeverTiles=[];
+  GAME.feverBg.destroy();
+    GAME.feverBg2.destroy();
+    GAME.feverBg4.destroy();
+    GAME.feverBg3.destroy();
+    GAME.centerEffect.destroy();
+    GAME.feverText.destroy();
+      for(let i=0; i<5; i++)  {
+        GAME.gaugeEffects[i].destroy();
+      }
+      for(let i=0; i<GAME.bgStars.length;i++) {
+        GAME.bgStars[i].destroy();
+      }
+    for(let i=0; i<GAME.feverGauges.length; i++)  {
+      GAME.feverGauges[i].destroy();
+    }
+    GAME.feverGauges=[];
+
+    for(let i=GAME.newTile.length-1; i>=0; i--)  {
+      GAME.newTile.pop().destroy();
+    }
+    GAME.newTile=[];
+    for(let i=GAME.oldNewTiles.length-1; i>=0; i--)  {
+      GAME.newTile.push(GAME.oldNewTiles.pop());
+      GAME.newTile[GAME.newTile.length-1].revive();
+    }
+    for(let i=0; i<GAME.newTile.length; i++)  {
+      GAME.newTile[i].alpha=1;
+    }
+    feverSound.stop();
+    gameSound.play();
+}
+function UpdateNextFeverTile() {
+  GAME.nextFeverTile++;
+  if(GAME.nextFeverTile>3)
+    GAME.nextFeverTile=1;
+}
+function updateFever()  {
+  GAME.feverETime+=game.time.physicsElapsed;
+if(GAME.feverbgToggle+GAME.feverToggleA*game.time.physicsElapsed>=1 || GAME.feverbgToggle+GAME.feverToggleA*game.time.physicsElapsed<=0)  {
+  GAME.feverTextProg=0;
+    GAME.feverToggleA*=-1;
+}
+  GAME.feverbgToggle+=GAME.feverToggleA*game.time.physicsElapsed;
+  GAME.feverBg3.alpha=GAME.feverbgToggle;
+GAME.feverBg4.alpha=1-GAME.feverbgToggle;
+  if(GAME.feverBg.alpha<1)  {
+    GAME.feverBg.alpha+=game.time.physicsElapsed*3;
+    GAME.feverBg3.alpha=game.time.physicsElapsed*3;
+    GAME.feverBg4.alpha=game.time.physicsElapsed*3;
+    if(GAME.feverBg.alpha>1)  {
+      GAME.feverBg.alpha=1;
+      GAME.feverBg3.alpha=1;
+      GAME.feverBg4.alpha=1;
+    }
+  }
+  if(GAME.feverTextProg==0)  {
+    GAME.feverText.scale.setTo(GAME.feverText.scale.x+game.time.physicsElapsed);
+    if(GAME.feverText.scale.x>=1) {
+      GAME.feverText.scale.setTo(1);
+      GAME.feverTextProg=1;
+    }
+  } else if(GAME.feverTextProg==1)  {
+    GAME.feverText.scale.setTo(GAME.feverText.scale.x-game.time.physicsElapsed/5);
+  }
+
+  GAME.centerEffect.alpha=0;
+  for(let i=0; i<5; i++)  {
+    GAME.gaugeEffects[i].rotation+=game.time.physicsElapsed;
+  }
+  if(GAME.feverETime>=5-3 && GAME.warncnt<=3)  {
+    if(GAME.feverBg2.alpha-game.time.physicsElapsed <=0)  {
+      GAME.feverBg2.alpha+=1;
+      GAME.warncnt++;
+      if(GAME.warncnt==4) {
+        GAME.feverBg2.kill();
+      }
+    }
+      GAME.feverBg2.alpha-=game.time.physicsElapsed;
+    }
+  if(GAME.feverETime>=5)  {
+    fadeFever();
+  }
+}
+function renderFeverBG()  {
+  if(GAME.feverState==0)
+  return;
+  game.world.bringToTop(GAME.feverBg);
+  for(let i=0; i<GAME.bgStars.length; i++)
+  game.world.bringToTop(GAME.bgStars[i]);
+  game.world.bringToTop(GAME.feverBg2);
+      game.world.bringToTop(GAME.feverBg3);
+        game.world.bringToTop(GAME.feverBg4);
+}
+function renderFeverUI()  {
+
+  if(GAME.feverState==1)  {
+    game.world.bringToTop(GAME.feverText);
+      for(let i=0; i<5; i++)  {
+        game.world.bringToTop(GAME.gaugeEffects[i]);
+      }
+        game.world.bringToTop(GAME.centerEffect);
+    }
+}
 function unlockCharacters(highScore) {
   for (let i = 5; i >= 0; i--) {
     if (highScore < charlockCond[i] && charlockCond[i] <= GAME.score) {
@@ -726,6 +1011,8 @@ function isAllTileHeld() {
 
 function releasePattern1() {
   GAME.combo = 0;
+  GAME.gaugecombo=0;
+
   for (let i = 0; i < GAME.newTile.length; i++) {
     resetNewTile(i);
     let r = (Math.random()) / 3 * 2;
@@ -773,8 +1060,8 @@ function addCombo(n) {
   GAME.combo += n;
   if (GAME.combo < 2)
     return;
-  let x = width / 2;
-  let y = 300;
+  let x = width / 2+10;
+  let y = 300+40;
   let k = GAME.combo.toString();
   for (let i = 0; i < GAME.comboImages.length; i++)
     GAME.comboImages[i].destroy();
@@ -790,7 +1077,7 @@ function addCombo(n) {
   let len = GAME.comboImages.length;
 
   x = width / 2 + 20; //28*36
-  y = 300 - 50;
+  y = 300 - 50+40;
   let bonus = Math.floor(GAME.combo / 10 + 1) * 10;
   k = '';
   k = bonus.toString();
@@ -840,6 +1127,11 @@ function resetNewTile(i) {
 }
 
 function createNewTile(i) {
+  if(GAME.feverState==1)  {
+    GAME.newTile.push(AddImage(GAME.newTileAnswerX+i*GAME.oneTileX,GAME.newTileAnswerY+i*GAME.oneTileY,'fevertile'+GAME.nextFeverTile));
+    UpdateNextFeverTile();
+    return;
+  }
   GAME.tileDir.push(0);
   GAME.tileSpeed.push(0);
   GAME.holdTile.push(true);
@@ -895,9 +1187,20 @@ function moveOthers(x, y) {
     GAME.newTile[i].x += x;
     GAME.newTile[i].y += y;
   }
+  moveArray(x,y,GAME.charEffects);
+  moveArray(x,y,GAME.ringEffects);
+  //moveArray(x,y,GAME.textEffects);
+  moveArray(x,y,GAME.stars);
+}
+function moveArray(x,y,arr) {
+  for(let i=0; i<arr.length; i++) {
+    arr[i].x+=x;
+    arr[i].y+=y;
+  }
 }
 
 function pushNewTile(x, y) {
+  GAME.newTile[0].alpha=1;
   GAME.tiles.push(GAME.newTile[0]);
   getRidOfNewTile(0);
   delIfOverTail();
@@ -910,6 +1213,8 @@ function destroyNewTile(i) {
 
 function getRidOfNewTile(i) {
   GAME.newTile.splice(i, 1);
+  if(GAME.feverState==1)
+  return;
   GAME.tileSpeed.splice(i, 1);
   GAME.tileDir.splice(i, 1);
   GAME.tileType.splice(i, 1);
@@ -958,12 +1263,12 @@ function itemTouched(pointer) {
 }
 
 function Jump() {
-  jumpSound.play();
-  changePlayerAnim('Up', GAME.upAnimSpeed, false);
-  GAME.jumpState = 0.5;
-  pushNewTile(GAME.newTile[0].x, GAME.newTile[0].y);
+    jumpSound.play();
+    changePlayerAnim('Up', GAME.upAnimSpeed, false);
+    GAME.jumpState = 0.5;
+    pushNewTile(GAME.newTile[0].x, GAME.newTile[0].y);
 
-  game.world.bringToTop(GAME.player);
+    game.world.bringToTop(GAME.player);
 }
 
 function changePlayerAnim(key, speed, loop) {
@@ -1024,11 +1329,16 @@ function setRenderOrder() {
       game.world.bringToTop(GAME.clouds[i][j]);
     }
   }
+  renderFeverBG();
   for (let i = 0; i < GAME.tiles.length; i++)
     game.world.bringToTop(GAME.tiles[i]);
 
   for (let i = 0; i < GAME.newTile.length; i++)
     game.world.bringToTop(GAME.newTile[i]);
+  if(GAME.feverState==1)  {
+    for(let i=0; i<GAME.oldNewTiles.length; i++)
+    game.world.bringToTop(GAME.oldNewTiles[i]);
+  }
   game.world.bringToTop(GAME.shadow);
   for (let i = 0; i < GAME.scoreImages.length; i++)
     game.world.bringToTop(GAME.scoreImages[i]);
@@ -1054,6 +1364,17 @@ function setRenderOrder() {
     if(!(GAME.starDir[i]>=Math.PI*1.2 && GAME.starDir[i]<=Math.PI*1.8))
       game.world.bringToTop(GAME.stars[i]);
   }
+  for(let i=0; i<GAME.comboImages.length;i++) {
+    game.world.bringToTop(GAME.comboImages[i]);
+  }
+  for(let i=0; i<GAME.feverBars.length;i++) {
+    game.world.bringToTop(GAME.feverBars[i]);
+  }
+    renderFeverUI();
+  for(let i=0; i<GAME.feverGauges.length;i++) {
+    game.world.bringToTop(GAME.feverGauges[i]);
+  }
+
 
 }
 
@@ -1138,7 +1459,14 @@ function activateEffects() {
 }
 
 function updateEffects(type) {
-
+  for(let i=0; i<GAME.feverGauges.length; i++) {
+    if(GAME.feverGauges[i].scale.x<1) {
+      GAME.feverGauges[i].scale.setTo(GAME.feverGauges[i].scale.x+game.time.physicsElapsed*6);
+      if(GAME.feverGauges[i].scale.x>1) {
+        GAME.feverGauges[i].scale.setTo(1);
+      }
+    }
+  }
   for (let i = 0; i < GAME.textEffects.length; i++) {
     GAME.textEffects[i].alpha -= game.time.physicsElapsed * 3;
     GAME.textEffects[i].y -= game.time.physicsElapsed * 70;
@@ -1156,11 +1484,14 @@ function updateEffects(type) {
       }
     }
     for (let i = 0; i < GAME.ringEffects.length; i++) {
-      GAME.ringEffects[i].alpha -= game.time.physicsElapsed * 2;
-      GAME.ringEffects[i].scale.setTo(GAME.ringEffects[i].scale.x + game.time.physicsElapsed * 2);
-      if (GAME.ringEffects[i].alpha - game.time.physicsElapsed * 2 <= 0) {
+      if(GAME.ringEffects[i].scale.x<1.2)
+        GAME.ringEffects[i].scale.setTo(GAME.ringEffects[i].scale.x + game.time.physicsElapsed * 3);
+      if (GAME.ringEffects[i].scale.x>=1.2) {
+        GAME.ringEffects[i].alpha -= game.time.physicsElapsed * 3;
+        if(GAME.ringEffects[i].alpha-game.time.physicsElapsed * 3<=0) {
         GAME.ringEffects[i].destroy();
         GAME.ringEffects.splice(i, 1);
+      }
       }
     }
     for (let i = 0; i < GAME.stars.length; i++) {
@@ -1188,6 +1519,7 @@ function updateEffects(type) {
       }
     }
   }
+  game.state.add('loadloadst', LOADLOAD)
 
   game.state.add('loadst', LOAD)
   game.state.add('titlest', TITLE);
@@ -1196,4 +1528,4 @@ function updateEffects(type) {
   game.state.add('charselectst', CHARSELECT);
   game.state.add('gamest', GAME);
 
-  game.state.start('loadst');
+  game.state.start('loadloadst');
