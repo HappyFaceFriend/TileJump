@@ -722,6 +722,7 @@ var GAME = {
         createNewTile(this.newTile.length);
       }
     } else if (this.jumpState == -3) {
+      document.getElementById("bd").style.backgroundColor = "#3f375f";
       this.overBG = AddImage(0, 0, 'bgOver');
       this.board = AddImage(108, 345, 'boardOver');
       this.allranking = AddImage(136, 515, 'allrankingOver');
@@ -818,6 +819,7 @@ function startFever()  {
   }
 }
 function fadeFever()  {
+  document.getElementById("bd").style.transition = "background-color 1s ease-in-out";
   document.getElementById("bd").style.backgroundColor = "#6FCAFF";
   GAME.feverFade-=game.time.physicsElapsed;
   GAME.feverBg.alpha=GAME.feverFade;
@@ -848,6 +850,7 @@ function fadeFever()  {
   }
 }
 function endFever() {
+document.getElementById("bd").style.transition = "background-color 0.1s ease-in-out";
 GAME.feverAddSpeed=1;
 GAME.newTileAnswerX+=45/2;
 GAME.newTileAnswerY+=47/2;
@@ -1232,11 +1235,13 @@ function delIfOverTail() {
 
 function pauseOnClick() {
   if (game.paused) {
+    document.getElementById("bd").style.backgroundColor = "#6FCAFF";
     game.paused = false;
     GAME.pauseButton.revive();
     GAME.pauseBG.kill();
     GAME.resumeButton.kill();
   } else {
+    document.getElementById("bd").style.backgroundColor = "#3f375f";
     GAME.pauseBG.revive();
     game.world.bringToTop(GAME.pauseBG);
     GAME.pauseButton.kill();
