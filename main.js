@@ -567,6 +567,8 @@ var GAME = {
     mainSound.isPlaying = false;
     gameSound.play();
     this.purescore=0;
+
+    CreateNewFeverStar();
   },
   update: function() {
     moveBG();
@@ -691,7 +693,10 @@ var GAME = {
             g.anchor.setTo(0.5);
             g.scale.setTo(0.3);
             this.feverGauges.push(g);
-
+            MoveNewFeverStar();
+          }
+          else{
+            ResizeNewFeverStar();
           }
         }
       }
@@ -755,6 +760,22 @@ var GAME = {
     if (this.jumpState >= 0)
       setRenderOrder();
   }
+}
+function CreateNewFeverStar() {
+  GAME.newFeverStar=AddImage(82+GAME.feverGauges.length*138,1090,'fevergauge');
+  GAME.cropRect = new Phaser.Rectangle(0,0,0,GAME.newFeverStar.height);
+  GAME.newFeverStar.crop(GAME.cropRect);
+
+}
+function MoveNewFeverStar() {
+  GAME.newFeverStar.x=82+GAME.feverGauges.length*138;
+  GAME.cropRect = new Phaser.Rectangle(0,0,0,GAME.newFeverStar.height);
+  GAME.newFeverStar.crop(GAME.cropRect);
+}
+function ResizeNewFeverStar() {
+  //TODO
+  GAME.cropRect = new Phaser.Rectangle(0,0,GAME.gaugecombo/5*GAME.newFeverStar.width,GAME.newFeverStar.height);
+  GAME.newFeverStar.crop(GAME.cropRect);
 }
 function startFever()  {
   document.getElementById("bd").style.backgroundColor = "#041b47";
@@ -1377,6 +1398,7 @@ function setRenderOrder() {
     game.world.bringToTop(GAME.feverBars[i]);
   }
     renderFeverUI();
+  game.world.bringToTop(GAME.newFeverStar);
   for(let i=0; i<GAME.feverGauges.length;i++) {
     game.world.bringToTop(GAME.feverGauges[i]);
   }
